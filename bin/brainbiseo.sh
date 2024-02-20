@@ -3,37 +3,25 @@
 
 SERVER_PORT=5000
 SERVER_HOME=/data/bwllm/brainbiseo
-SERVER_LOG=${SERVER_HOME}/logs
+SERVER_LOG_DIR=${SERVER_HOME}/logs
 SERVER_CONFIG=${SERVER_HOME}/config/app.config
+LOGFILE_START=${SERVER_LOG_DIR}/start_$(date +%Y-%m-%d).log
 
 function start()
 {
    if lsof -i :$SERVER_PORT &>/dev/null; then
       echo "Server start is aborted because port $SERVER_PORT is in use."
    else
+      CURRENT_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
       echo "Starting the BrainBiseo on port $SERVER_PORT ..."
-      nohup python ${SERVER_HOME}/app.py --basedir=${SERVER_HOME} --port=${SERVER_PORT} --config=${SERVER_CONFIG} >${SERVER_LOG}/start_$(date +%Y-%m-%d).log 2>&1 &
+      echo "BrainBiseo Daemon start time: ${CURRENT_TIME}" > ${LOGFILE_START}
+      nohup python ${SERVER_HOME}/app.py --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} >>${LOGFILE_START} 2>&1 &
    fi
 }
 
 function status() 
 {
-   ps -ef | grep jupyter
-}
-
-function list()
-{
-   jupyter server list
-}
-
-function kernel()
-{
-   jupyter kernelspec list
-}
-
-function observer()
-{
-   watch -d -n 0.5 nvidia-smi
+   ps -ef | grep brainbiseo
 }
 
 function stop()
@@ -57,7 +45,7 @@ function stop()
    else
      echo "No process is using port $SERVER_PORT"	   
    fi
-     echo "Jupyter stopping ... PID : $target_pid"
+     echo "BrainBiseo stopping ... PID : $target_pid"
 }
 
 
@@ -80,19 +68,10 @@ case "$1" in
     status)
 	status
     ;;
-    list)
-	list
-    ;;
-    kernel)
-	kernel
-    ;;
-    observer)
-        observer
-    ;;
     stop)
         stop
         sleep 0.1
     ;;
     *)
-        echo "Usage: $0 {start|stop|list|kernel|observer|status}"
+        echo "Usage: $0 {start|stop|status}"
 esac
