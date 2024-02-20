@@ -1,21 +1,23 @@
 #!/bin/bash
 #
 
+export FLASK_APP=brainbiseo
+export FLASK_DEBUG=true
+
 SERVER_PORT=5000
 SERVER_HOME=/data/bwllm/brainbiseo
 SERVER_LOG_DIR=${SERVER_HOME}/logs
 SERVER_CONFIG=${SERVER_HOME}/config/app.config
-LOGFILE_START=${SERVER_LOG_DIR}/start_$(date +%Y-%m-%d).log
+SERVER_START_FILE=starter.py
 
 function start()
 {
    if lsof -i :$SERVER_PORT &>/dev/null; then
       echo "Server start is aborted because port $SERVER_PORT is in use."
    else
-      CURRENT_TIME=$(date +"%Y-%m-%d_%H-%M-%S")
       echo "Starting the BrainBiseo on port $SERVER_PORT ..."
-      echo "BrainBiseo Daemon start time: ${CURRENT_TIME}" > ${LOGFILE_START}
-      nohup python ${SERVER_HOME}/app.py --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} >>${LOGFILE_START} 2>&1 &
+      nohup python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} > /dev/null 2>&1 &
+      #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} &
    fi
 }
 
@@ -25,7 +27,7 @@ function status()
 }
 
 function stop()
-{
+{    
    target_pid=$(getPid)
    if kill -0 $target_pid 2>/dev/null; then
      echo "Process $target_pid is running. Attempting to terminate..."
