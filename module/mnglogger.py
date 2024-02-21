@@ -50,6 +50,15 @@ class LoggingManager:
         
         return logger
     
+    def getAppLogger(self):
+        return LoggingManager.loggerApp
+    
+    def getErrorLogger(self):
+        return LoggingManager.loggerError
+    
+    def getModelLogger(self):
+        return LoggingManager.loggerModel
+    
     @staticmethod 
     def StartWebserver():
         LoggingManager.loggerApp.info('')

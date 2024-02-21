@@ -1,14 +1,16 @@
 #!/bin/bash
 #
 
-export FLASK_APP=brainbiseo
+export FLASK_APP=aibiseo
 export FLASK_DEBUG=true
 
+SERVER_APP_NAME=aibiseo
 SERVER_PORT=5000
-SERVER_HOME=/data/bwllm/brainbiseo
+SERVER_HOME=/data/bwllm/${SERVER_APP_NAME}
 SERVER_LOG_DIR=${SERVER_HOME}/logs
-SERVER_CONFIG=${SERVER_HOME}/config/app.config
+SERVER_CONFIG_DIR=${SERVER_HOME}/config
 SERVER_START_FILE=starter.py
+SERVER_CONSOLE_LOG=${SERVER_LOG_DIR}/server_$(date +"%Y-%m-%d_%H").log
 
 function start()
 {
@@ -16,14 +18,14 @@ function start()
       echo "Server start is aborted because port $SERVER_PORT is in use."
    else
       echo "Starting the BrainBiseo on port $SERVER_PORT ..."
-      nohup python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} > /dev/null 2>&1 &
-      #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --config=${SERVER_CONFIG} &
+      nohup python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} >> ${SERVER_CONSOLE_LOG} 2>&1 &
+      #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} >> ${SERVER_CONSOLE_LOG}
    fi
 }
 
 function status() 
 {
-   ps -ef | grep brainbiseo
+   ps -ef | grep ${SERVER_APP_NAME}
 }
 
 function stop()
