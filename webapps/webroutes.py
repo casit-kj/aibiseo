@@ -6,23 +6,28 @@ module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
 
-from flask import render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request
 
 class RouterManager:
     def __init__(self, app):
         self.app = app
         self.register_routes()
     
-    def register_routes(self):                
+    def register_routes(self): 
+                       
         @self.app.route("/")
         def index():
             return render_template('index.html')
         
         @self.app.route("/api/chat", methods=['POST'])
-        def chat_post():
-            request_data = request.json  # 클라이언트로부터 받은 JSON 데이터
-            response_data = {
-                "message": "Data received",
-                "yourData": request_data
-            }
-            return jsonify(response_data)
+        def chatPost():
+            print("왜 에러가 나는 거지")
+            if request.content_type != 'application/json':
+                return jsonify({"error": "Content-Type must be application/json"}), 415            
+            answer = request.get_data()
+            dialog = {
+                'request' : answer,
+                'response' : 'my name is haengun'
+            }            
+            return dialog
+  

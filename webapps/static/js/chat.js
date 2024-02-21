@@ -116,12 +116,13 @@ async function ask_gpt2(message){
 
   let jsonSend = {};
   jsonSend.query=message;
-  const jsonTpyeData = JSON.stringify(jsonSend);
+  jsonTpyeData = JSON.stringify(jsonSend);
   console.log(jsonSend);
   try {
     const response = await $.ajax({
       type: "POST",
-      url: 'http://hub.aicasit.com/api/chat',
+      url: "/api/chat",
+      content_type: "application/json",
       dataType: "json",
       data: jsonTpyeData,
     });
