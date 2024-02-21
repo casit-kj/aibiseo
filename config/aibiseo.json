@@ -1,0 +1,9 @@
+{
+    "basedir": "/data/bwllm/aibiseo",
+    "modeldir": "/data/bwllm/aibiseo/model",
+    "model": {
+        "name": "casllm_audit_7bhf_v001",
+        "max_tokens": 500,
+        "temporated": 0.8
+    }
+}
