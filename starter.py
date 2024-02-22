@@ -1,5 +1,6 @@
 from module.mngcfg import ConfigManager, ConsolePrint
 from module.mnglogger import LoggingManager
+from model.llmserver import LLMServer
 from webapps.webserver import WebServer
 import os, sys
 import atexit
@@ -12,8 +13,11 @@ def callApplicationDispatch(name, appLogger, appConfig):
     basedir = appConfig.get_basedir()
     static_dir = os.path.join(basedir, "webapps/static")
     templates_dir = os.path.join(basedir, "webapps/templates")
-        
-    daemon = WebServer(name, appLogger, appConfig.get_config_json(), static_dir, templates_dir)
+
+    llmServer = LLMServer(appConfig.get_config_json())
+    llmServer.load_model()
+    
+    daemon = WebServer(name, appLogger, llmServer, appConfig.get_config_json(), static_dir, templates_dir)
     daemon.run(appConfig.get_port())
     
 if __name__ == '__main__':

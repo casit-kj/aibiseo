@@ -114,37 +114,37 @@ async function ask_gpt2(message){
   await new Promise((r) => setTimeout(r, 1000));
   window.scrollTo(0, 0);
 
-  let jsonSend = {};
-  jsonSend.query=message;
-  jsonTpyeData = JSON.stringify(jsonSend);
-  console.log(jsonSend);
+  let jsonDialog = {
+    "prompt" : message,
+    "reference": "참조 데이터",
+    "dialog": "대회 내용"
+  }
+  let jsonTypeData = JSON.stringify(jsonDialog);
+  console.log(jsonDialog);
+
   try {
     const response = await $.ajax({
       type: "POST",
       url: "/api/chat",
-      content_type: "application/json",
+      contentType: "application/json", // 올바른 속성 이름으로 수정
       dataType: "json",
-      data: jsonTpyeData,
+      data: jsonTypeData, // 변수 이름 오타 수정
     });
     console.log(response);
-    if(response['status']) {
-      const datatset = response['results'];
+    if (response['status']) {
+      const resResultData = response['results'];
       document.getElementById(`gpt_${window.token}`).innerHTML =
-            markdown.render(datatset);
-
+            markdown.render(resResultData['answer']);
+  
       window.scrollTo(0, 0);
       message_box.scrollTo({ top: message_box.scrollHeight, behavior: "auto" });
       await remove_cancel_button();
-    }}
-
-   catch (error) {
-
+    } 
+  } catch (error) {
      message_box.scrollTop = message_box.scrollHeight;
      await remove_cancel_button();
      prompt_lock = false;
-
      await load_conversations(20, 0);
-
      console.log(error);
 
      let cursorDiv = document.getElementById(`cursor`);

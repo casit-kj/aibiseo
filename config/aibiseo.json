@@ -2,8 +2,15 @@
     "basedir": "/data/bwllm/aibiseo",
     "modeldir": "/data/bwllm/aibiseo/model",
     "model": {
-        "name": "casllm_audit_7bhf_v001",
-        "max_tokens": 500,
-        "temporated": 0.8
+        "name": "casbw-base-7b-hf",
+        "max_token": 2000,
+        "sequences" : 1,
+        "temperature": 0.7,
+        "top_k": 0,
+        "top_p": 1,
+        "repetition_penalty": 1.0,
+        "length_penalty": 1.0,
+        "no_repeat_ngram_size": 2,
+        "early_stopping": "True"
     }
 }
