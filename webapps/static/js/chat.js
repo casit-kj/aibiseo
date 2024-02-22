@@ -129,11 +129,9 @@ async function ask_gpt2(message){
     console.log(response);
     if(response['status']) {
       const datatset = response['results'];
+      document.getElementById(`gpt_${window.token}`).innerHTML =
+            markdown.render(datatset);
 
-      for (let i = 0; i < datatset.length; i++) {
-        document.getElementById(`gpt_${window.token}`).innerHTML =
-            markdown.render(datatset[i].text);
-      }
       window.scrollTo(0, 0);
       message_box.scrollTo({ top: message_box.scrollHeight, behavior: "auto" });
       await remove_cancel_button();

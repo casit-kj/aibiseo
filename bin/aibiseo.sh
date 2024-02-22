@@ -19,7 +19,7 @@ function start()
    else
       echo "Starting the BrainBiseo on port $SERVER_PORT ..."
       nohup python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} >> ${SERVER_CONSOLE_LOG} 2>&1 &
-      #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} >> ${SERVER_CONSOLE_LOG}
+      #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} 2>&1 &
    fi
 }
 

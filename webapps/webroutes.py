@@ -9,8 +9,9 @@ module.writer.email: jamesohe@gmail.com
 from flask import Flask, render_template, jsonify, request
 
 class RouterManager:
-    def __init__(self, app):
+    def __init__(self, app, loggerManager):
         self.app = app
+        self.loggerManager = loggerManager
         self.register_routes()
     
     def register_routes(self): 
@@ -19,15 +20,15 @@ class RouterManager:
         def index():
             return render_template('index.html')
         
-        @self.app.route("/api/chat", methods=['POST'])
+        @self.app.route("/api/chat", methods=['GET', 'POST'])
         def chatPost():
-            print("왜 에러가 나는 거지")
-            if request.content_type != 'application/json':
-                return jsonify({"error": "Content-Type must be application/json"}), 415            
-            answer = request.get_data()
-            dialog = {
-                'request' : answer,
-                'response' : 'my name is haengun'
-            }            
-            return dialog
+            response_data = {
+                "status": "200",
+                "results": "jamesohe"
+            }
+            if request.method == 'POST':
+                return response_data
+            else:
+                return 'Welcome, get'
+           
   
