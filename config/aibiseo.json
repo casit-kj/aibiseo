@@ -1,8 +1,8 @@
 {
     "basedir": "/data/bwllm/aibiseo",
-    "modeldir": "/data/bwllm/aibiseo/model",
+    "modeldir": "/data/bwllm/models/",
     "model": {
-        "name": "casbw-base-7b-hf",
+        "name": "KoAlpaca-Polyglot-12.8B",
         "max_token": 2000,
         "sequences" : 1,
         "temperature": 0.7,

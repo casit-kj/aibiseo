@@ -72,4 +72,13 @@ class LoggingManager:
     def StopWebServer():
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         log_message = f"Daemon stop time: {current_time}"
-        LoggingManager.loggerApp.info(log_message)        
+        LoggingManager.loggerApp.info(log_message)
+        
+    def printAppLogger(self, message):
+        LoggingManager.loggerApp.info(message)  
+        
+    def printErrorLogger(self, message):
+        LoggingManager.loggerError.info(message)      
+        
+    def printModelLogger(self, message):
+        LoggingManager.loggerError.info(message)                       

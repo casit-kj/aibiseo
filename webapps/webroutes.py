@@ -34,31 +34,36 @@ class RouterManager:
                 return response_data
             
             # Validate LLM Model Loadding
-            if self.llmServer.model == None:
-                response_data = {
-                    "status": "405",
-                    "results": {
-                        "answer": "error: CAS BW LLM model is not loaded."
-                    }
-                }
-                return response_data
+            # if self.llmServer.model == None:
+            #     response_data = {
+            #         "status": "405",
+            #         "results": {
+            #             "answer": "error: CAS BW LLM model is not loaded."
+            #         }
+            #     }
+            #     return response_data
             
             # Generate Login
             reqJsonData = request.get_json()
-            prompt = reqJsonData['prompt']
-            reference = reqJsonData['reference']
-            dialog = reqJsonData['dialog'] 
             
-            self.llmServer.generate(prompt)
-            answer = self.llmServer.generate(prompt)
+            query = reqJsonData['query']
+            content = reqJsonData['content'] 
+            
+            reQuery = self.llmServer.make_query(query, content)
+            
+            
+            if isinstance(content, list):
+                self.loggerManager.printAppLogger(len(content))
+            else:
+                self.loggerManager.printErrorLogger("오행언 배열 아님")
+            #answer = self.llmServer.generate(reQuery)
                        
             resultData = {
-                "status": "200",
-                "results": {
-                    "prompt": prompt,
-                    "reference": reference,
-                    "dialog": dialog,
-                    "answer": answer
+                "result": {
+                    "status": True,
+                    "code": "200",
+                    "text": content[0],
+                    "content": content
                 }
             }                          
             return resultData
