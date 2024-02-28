@@ -14,14 +14,13 @@ def callApplicationDispatch(name, appLogger, appConfig):
     static_dir = os.path.join(basedir, "webapps/static")
     templates_dir = os.path.join(basedir, "webapps/templates")
 
-    llmServer = LLMServer(appConfig.get_config_json())
-    #llmServer.load_model()
+    llmServer = LLMServer(appLogger, appConfig.get_config_json())
+    llmServer.load_model()
     
     daemon = WebServer(name, appLogger, llmServer, appConfig.get_config_json(), static_dir, templates_dir)
     daemon.run(appConfig.get_port())
     
 if __name__ == '__main__':
-    
     # Enviroment Config file Check
     appConfig = ConfigManager()    
     if not appConfig.exist_app_config_file():

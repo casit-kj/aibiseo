@@ -33,37 +33,26 @@ class RouterManager:
                 }
                 return response_data
             
-            # Validate LLM Model Loadding
-            # if self.llmServer.model == None:
-            #     response_data = {
-            #         "status": "405",
-            #         "results": {
-            #             "answer": "error: CAS BW LLM model is not loaded."
-            #         }
-            #     }
-            #     return response_data
-            
             # Generate Login
             reqJsonData = request.get_json()
             
+            # Create prompt for LLM           
+            preprompt = "대화준비"
             query = reqJsonData['query']
-            content = reqJsonData['content'] 
-            
-            reQuery = self.llmServer.make_query(query, content)
-            
-            
-            if isinstance(content, list):
-                self.loggerManager.printAppLogger(len(content))
+            reference = reqJsonData['reference'] 
+            history = reqJsonData['history']                      
+            reQuery = self.llmServer.create_prompt(preprompt, query, reference, history)
+                        
+            if self.llmServer.is_alive():
+                answer = self.llmServer.generate(reQuery)
             else:
-                self.loggerManager.printErrorLogger("오행언 배열 아님")
-            #answer = self.llmServer.generate(reQuery)
+                answer = self.llmServer.get_model_name() + " 모델이 로딩되지 않았습니다."
                        
             resultData = {
                 "result": {
                     "status": True,
                     "code": "200",
-                    "text": content[0],
-                    "content": content
+                    "text": answer
                 }
             }                          
             return resultData

@@ -7,6 +7,7 @@ module.writer.email: jamesohe@gmail.com
 """
 
 from flask import Flask, request, jsonify
+from gevent.pywsgi import WSGIServer
 from webapps.webroutes import RouterManager
 
 class WebServer:    
@@ -41,5 +42,7 @@ class WebServer:
             return jsonify(error=str(e)), 500                
         
     def run(self, port=2000):
-        self.app.run(debug=True, host='0.0.0.0', port=port)
-        self.logger_app.info("Flask Web Daemon starting....")
+        self.loggerManager.printAppLogger("Flask Web Daemon starting....")
+        http_server = WSGIServer(('0.0.0.0', int(port)), self.app)
+        http_server.serve_forever()
+        #self.app.run(debug=True, host='0.0.0.0', port=port)

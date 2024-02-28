@@ -81,4 +81,4 @@ class LoggingManager:
         LoggingManager.loggerError.info(message)      
         
     def printModelLogger(self, message):
-        LoggingManager.loggerError.info(message)                       
+        LoggingManager.loggerModel.info(message)                       

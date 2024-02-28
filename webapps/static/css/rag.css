@@ -32,7 +32,7 @@ body {
     box-sizing: border-box;
     position: relative;
 }
-.conversations {
+.searchresults {
     max-height: 95vh;
     max-width: 260px;
     padding: var(--section-gap);
@@ -162,10 +162,10 @@ body {
 .stop_generating-hidden button {
     display: none;
 }
-.spinner{
+.resultbox{
 
 }
-.conversations .convo {
+.searchresults .rcontent {
     font-size: 10px;
     user-select: none;
     width: 100%; /* 또는 특정 너비를 지정 */
@@ -173,7 +173,7 @@ body {
     overflow-wrap: break-word; /* 표준 속성 */
 }
 
-.conversations .search-content {
+.searchresults .search-content {
     padding: 8px 12px;
     gap: 18px;
     align-items: center;
@@ -226,7 +226,7 @@ body {
     right: 0;
     height: 60%;
     width: 60%;
-    background: var(--colour-3);
+    background: #84719040;
     filter: blur(10px) opacity(0.5);
     z-index: 10000;
 }
@@ -250,4 +250,138 @@ body {
     bottom: -6px;
     right: -6px;
     z-index: 1000;
+}
+
+
+/*대화 내용 저장*/
+.new_convo {
+    padding: 8px 12px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border: 1px dashed #74b4ec;
+    border-radius: var(--border-radius-1);
+}
+
+.new_convo span {
+    color: #74b4ec;
+    font-size: 14px;
+}
+
+.new_convo:hover {
+    border-style: solid;
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner:before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    width: 20px;
+    height: 20px;
+
+    border-radius: 50%;
+    border: 1px solid #74b4ec;
+    border-top-color: white;
+    animation: spinner .6s linear infinite;
+}
+
+.bottom_buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bottom_buttons button {
+    padding: 8px 12px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border: 1px solid #74b4ec;
+    border-radius: var(--border-radius-1);
+    width: 100%;
+}
+
+.bottom_buttons button span {
+    color: #74b4ec;
+    font-size: 14px;
+}
+.conversations {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: auto;
+    min-width: 0;
+}
+
+.conversations .title {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.conversations .convo {
+    padding: 8px 12px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    user-select: none;
+    justify-content: space-between;
+}
+
+.conversations .convo .left {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: auto;
+    min-width: 0;
+}
+
+.conversations i {
+    color: #132739FF;
+    cursor: pointer;
+}
+.convo-title {
+    color: #74b4ec;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.conversations {
+    max-width: 260px;
+    padding: var(--section-gap);
+    overflow: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.conversations .top {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: auto;
+}
+#cursor {
+    line-height: 17px;
+    margin-left: 3px;
+    -webkit-animation: blink 0.8s infinite;
+    animation: blink 0.8s infinite;
+    width: 7px;
+    height: 15px;
 }
