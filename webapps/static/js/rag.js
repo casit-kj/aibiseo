@@ -182,6 +182,7 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
     };
     const sendAksJson = JSON.stringify(askJson);
     console.log(sendAksJson);
+
     try {
         const response = await $.ajax({
             type: "POST",
@@ -191,12 +192,13 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
             data: sendAksJson,
         });
         console.log(response);
+
         let endAt = new Date();
         chatAssistantEndat.val(endAt.toISOString());
-        if(response['result']['status']) {
-            const datatset = response['result'];
-            $(`#llm_${window.token}`).append(datatset.text);
-            chatAssistantContent.val(datatset.text);
+        const resultSet = response['result'];
+        if(resultSet['status'] == true) {
+            $(`#llm_${window.token}`).append(resultSet.text);
+            chatAssistantContent.val(resultSet.text);
             window.scrollTo(0, 0);
             await remove_cancel_button();
         } else {

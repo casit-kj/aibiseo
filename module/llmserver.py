@@ -8,7 +8,7 @@ module.writer.email: jamesohe@gmail.com
 
 import os
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import LlamaForCausalLM, LlamaTokenizer
 from module.mnglogger import LoggingManager
 
 class LLMServer:
@@ -41,8 +41,12 @@ class LLMServer:
         message = f"{self.selectModelName} 모델 로딩.."
         self.appLogger.printModelLogger(message)
         load_model_path = os.path.join(self.modelDir, self.selectModelName)
-        self.usingModel = AutoModelForCausalLM.from_pretrained(load_model_path)          
-        self.usingTokenizer = AutoTokenizer.from_pretrained(load_model_path)      
+        
+        # 모델로딩   
+        self.usingModel = LlamaForCausalLM.from_pretrained(load_model_path)          
+        self.usingTokenizer = LlamaTokenizer.from_pretrained(load_model_path)
+        
+        # needed for gpt-neo-x tokenizer     
         self.usingTokenizer.pad_token = self.usingTokenizer.eos_token
                 
     # 모델 내리기                  
@@ -98,7 +102,8 @@ class LLMServer:
     
     # 문장 생성
     def generate(self, dialog_prompt):
-        inputs = self.usingTokenizer.encode_plus(dialog_prompt, **self.usingModelConfigEncode)
-        generate_ids = self.usingModel.generate(input_ids=inputs['input_ids'], **self.usingModelConfigGenerate)
-        output = self.usingTokenizer.decode(generate_ids[0], **self.usingModelConfigDecode)
+        inputs = self.usingTokenizer(dialog_prompt, return_tensors="pt")
+        generate_ids = self.usingModel.generate(inputs['input_ids'], max_length=2000)
+        output = self.usingTokenizer.decode(generate_ids[0], skip_special_tokens=False)
+        self.appLogger.printModelLogger(output)
         return output    

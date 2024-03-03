@@ -2,42 +2,33 @@
     "basedir": "/data/bwllm/aibiseo",
     "modeldir": "/data/bwllm/models/",
     "select_model": "KoAlpaca-Polyglot-12.8B",
-    "models": [{        
-        "name": "KoAlpaca-Polyglot-12.8B",
-        "encode": {
-            "return_tensors": "pt"
+    "models": [
+        {        
+            "name": "casllm-base-7b-hf",
+            "encode": {
+                "return_tensors": "pt"
+            },                                          
+            "generate": {
+                "max_length": 2000,
+                "temperature": 0.7,
+                "num_return_sequences": 1   
             },
-        "decode": {
-            "skip_special_tokens": true,
-            "clean_up_tokenization_spaces": false
-            },            
-        "generate": {
-            "do_sample": true,            
-            "max_length": 2000,
-            "num_return_sequences" : 1,
-            "repetition_penalty": 1.0,
-            "length_penalty": 1.0,
-            "no_repeat_ngram_size": 2,
-            "early_stopping": false                
+            "decode": {
+                "skip_special_tokens": true
             }
         },
         {        
-            "name": "casbw-base-7b-hf",
+            "name": "KoAlpaca-Polyglot-12.8B",
             "encode": {
                 "return_tensors": "pt"
-                },
-            "decode": {
-                "skip_special_tokens": true,
-                "clean_up_tokenization_spaces": false
-                },                                          
+            },                                          
             "generate": {
-                "do_sample": true,            
                 "max_length": 2000,
-                "num_return_sequences" : 1,
-                "repetition_penalty": 1.0,
-                "length_penalty": 1.0,
-                "no_repeat_ngram_size": 2,             
-                "early_stopping": false           
+                "temperature": 0.7,
+                "num_return_sequences": 1   
+            },
+            "decode": {
+                "skip_special_tokens": true
             }
         }      
     ]

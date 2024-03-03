@@ -1,3 +1,12 @@
+""" 
+목  적: LLM을 활용한 AI 챗봇시스템
+작성자: 오행언 광주AI융합연구소 이사
+소유권: (주)씨에이에스
+
+(주의) 시스템을 구동하기 위해서는 ${HOME}/config/requirements.txt 설치
+pip install -r requirements.txt
+"""
+
 from module.mngcfg import ConfigManager, ConsolePrint
 from module.mnglogger import LoggingManager
 from module.llmserver import LLMServer
