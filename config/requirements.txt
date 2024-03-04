@@ -1,7 +1,6 @@
+torch
 flask
 gevent
-
-torch
 transformers
 sentencepiece
 fairscale
