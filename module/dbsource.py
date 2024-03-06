@@ -91,7 +91,7 @@ class DBSource:
                 cursor = conn.cursor()
                 if cursor:
                     # SELECT 쿼리 작성
-                    sql = "SELECT * FROM chat_dialog"
+                    sql = "SELECT cd.*, cq.* FROM chat_dialog cd LEFT JOIN chat_qna cq ON cd.chat_dialog_id = cq.chat_dialog_id INNER JOIN ( SELECT chat_dialog_id, MIN(chat_assistant_startat) AS earliest_created_at FROM chat_qna GROUP BY chat_dialog_id) AS earliest_cq ON cq.chat_dialog_id = earliest_cq.chat_dialog_id AND cq.chat_assistant_startat = earliest_cq.earliest_created_at ORDER BY cd.chat_dialog_id ASC;"
                     
                     # 쿼리 실행
                     cursor.execute(sql)

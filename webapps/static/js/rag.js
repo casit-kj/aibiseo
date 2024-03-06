@@ -282,7 +282,7 @@ async function searchResult(dataset){
     const resultbox = $('.resultbox');
     resultbox.empty();
     dataset.forEach(function (data) {
-        let titlePageNoAName = data.owner_file+' > '+data.img_file;
+                let titlePageNoAName = data.owner_file+' > '+data.img_file;
         let divTitle = $("<div></div>").addClass("rcontent");
         let spanTitle = $("<span></span>").text(titlePageNoAName);
         divTitle.append(spanTitle);
@@ -321,26 +321,40 @@ async function new_conversation (){
     await chatList();
 }
 
-
-
-
 /**
  * 저장된 대화 불러오기
  * @returns {*[]}
  */
-function previousConversations(){
+async function previousConversations(){
+    console.log("과거 대화 내역 출력");
     let messages = [];
+
     // 모든 'content' 클래스를 가진 요소들의 텍스트를 반복하여 출력
+    let qna_id = "";
+    let conversation = null;
     $('.content').each(function() {
+        let sentence = $(this).text();
         let elementId = $(this).attr('id');
-        // id 값 내에서 특정 단어가 포함되어 있는지 확인합니다.
-        if (elementId.includes('user')) {
-            messages.push({"sender": "user", "question": $(this).text()});
-        } else {
-            messages.push({"sender": "assistant", "answer": $(this).text()});
+        let pairElementId = elementId.split("_");
+        let key = pairElementId[0].trim();
+        let value = pairElementId[1];
+
+        if(value != qna_id) {        
+            if(key == "user") {
+                conversation = {};
+                conversation.question = sentence;
+                qna_id = value;
+            }
+            count = 1
+        } else {  
+            if(key == "llm") {
+                conversation.answer = sentence;
+            }
+            messages.push(conversation);
+            conversation = null;                         
         }
     });
-    return messages
+    return messages;
 }
 
 /**
@@ -374,11 +388,10 @@ async function chatList(){
         });
         console.log(response);
         if(response["status"]) {
-            console.log(response["message"]);
-            const dataSet = response["message"];
+            const dataSet = response["result_Data"];
             await chatListup(dataSet);
         } else {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
         }
     } catch (error) {
         console.log(error);
@@ -393,8 +406,9 @@ async function chatList(){
  */
 async function chatListup(dataSet){
     const addConvo = $('#add_convo');
-
+    console.log(dataSet);
     addConvo.empty();
+    dataSet
     Object.keys(dataSet).forEach(key => {
         let idName = dataSet[key].name;
         let chatListTitle = dataSet[key].document[0].chat_user_content;
@@ -508,23 +522,25 @@ async function loadChatList(dataSet){
         let divUser = $("<div></div>").addClass("user");
         divUser.append(user_image);
         divMessage.append(divUser);
-        let divContent= $("<div></div>").addClass("content")
+                let divContent= $("<div></div>").addClass("content")
             .attr('id','user_'+data.chat_qna_id);
         divContent.append(data.chat_user_content);
         divMessage.append(divContent);
         message_box.append(divMessage);
 
 
-        /** GenAI 아이콘 및 답변창 */
+        /** GenAI 아이콘 */
         let divgMessage = $("<div></div>").addClass("message");
         let divgUser = $("<div></div>").addClass("user");
         divgUser.append(brainwise_image);
         divgMessage.append(divgUser);
+
+        /** GenAI 답변 */
         let divgContent= $("<div></div>").addClass("content")
             .attr('id','llm_'+data.chat_qna_id);
         let divgCursor = $("<div></div>").addClass("cursor");
         divgContent.append(divgCursor);
-        divgMessage.append(data.chat_assistant_content,divgContent);
+        divgMessage.append(data.chat_assistant_content, divgContent);
         message_box.append(divgMessage);
     });
 
