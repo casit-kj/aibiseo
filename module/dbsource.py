@@ -76,8 +76,33 @@ class DBSource:
                     return jsonify({"status": "error", "message": str(e)}), False
                 finally:
                     self.disconnection()                
-    def delete(self):
-        pass
+    def delete(self, delId):
+            print("확인")
+            print(delId)
+            conn = self.connection()
+            if(not self.is_alive()):
+                return False
+            else:
+                try:
+                    cursor = conn.cursor()
+                    if cursor:
+                        dialogsql = "DELETE `chat_dialog` WHERE  `chat_dialog_id` = %s"
+                        # 쿼리 실행
+                        cursor.execute(dialogsql, (delId['deleteId']))
+                        # 변경사항 저장
+                        conn.commit()                        
+                        sql = "DELETE `chat_qna` WHERE  `chat_dialog_id` = %s"
+                        # 쿼리 실행
+                        cursor.execute(sql, (delId['deleteId']))
+                        # 변경사항 저장
+                        conn.commit()
+                        return jsonify({"status": "success", "message": "Data delete into database"}), True
+                    else:
+                        return jsonify({"status": "failed", "message": "Failed to delete dataset"}), False               
+                except Exception as e:
+                    return jsonify({"status": "error", "message": str(e)}), False
+                finally:
+                    self.disconnection()  
     
     def update(self):
         pass

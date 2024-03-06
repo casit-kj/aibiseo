@@ -7,9 +7,11 @@ module.writer.email: jamesohe@gmail.com
 """
 
 import time
+from datetime import datetime
 from flask import Flask, render_template, jsonify, request
 import module.mhash as support_module
-from datetime import datetime
+import module.procdata as procdata
+
 class RouterManager:
     def __init__(self, app, loggerManager, dbServer, llmServer):
         self.app = app
@@ -39,7 +41,6 @@ class RouterManager:
                       
             # 전송데이터
             reqJsonData = request.get_json()
-            
             # 입력 변수 확인
             try:
                 question = reqJsonData['question']
@@ -56,7 +57,9 @@ class RouterManager:
                         "answer": "에러: 입력 파라메터 값을 확인하세요.",
                     }
                 }
-                return resultData                
+                return resultData                        
+            request_conversation = procdata.composit_question(past_dialog, question, reference)            
+            self.loggerManager.printModelLogger(request_conversation)
             
             # 대화 ID 생성                                             
             if dialog_id == None or dialog_id == "":
@@ -78,7 +81,6 @@ class RouterManager:
             assistant_end_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
             
             # 결과 저장                         
-
             data = {
                     "question":question,
                     "answer": answer,
@@ -114,10 +116,11 @@ class RouterManager:
            
         @self.app.route("/api/delDialog", methods=['POST'])
         def chatDeleteDialog():   
-            self.dbServer.connection()            
-            # 작업            
-            self.dbServer.disconnection()                    
-            return 'Welcome, get'
+            reqJsonData = request.get_json()
+            print(reqJsonData)
+            message, code = self.dbServer.delete(reqJsonData)                    
+            return jsonify({'result_Data': message,
+                            'status':code})
         
         @self.app.route("/api/chatList", methods=['GET'])
         def chatList():              

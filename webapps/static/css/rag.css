@@ -439,3 +439,8 @@ body {
     background: rgba(132, 113, 144, 0.15);
     border-radius: 20px;
 }
+
+#add_convo {
+    overflow: auto;
+    max-height: 73vh;
+}

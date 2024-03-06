@@ -45,7 +45,7 @@ async function askGenAI(){
         await searchResult(bw_dataset);
         arrayDataset = bwDatasetToArray(bw_dataset);
         await requestGenAI(message, arrayDataset, previousChat);
-        // await chatList();
+        await chatList();
     }
 }
 
@@ -167,7 +167,7 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
     const userId = $('#user_id');
     const dialogId = $('#dialog_id');
     const createAt = $('#create_at');
-
+    console.log(previousChat);
     /** 질문 요청 */
     let askJson = {
         "question": message,
@@ -325,10 +325,8 @@ async function new_conversation (){
  * 저장된 대화 불러오기
  * @returns {*[]}
  */
-async function previousConversations(){
-    console.log("과거 대화 내역 출력");
+function previousConversations(){
     let messages = [];
-
     // 모든 'content' 클래스를 가진 요소들의 텍스트를 반복하여 출력
     let qna_id = "";
     let conversation = null;
@@ -406,12 +404,10 @@ async function chatList(){
  */
 async function chatListup(dataSet){
     const addConvo = $('#add_convo');
-    console.log(dataSet);
     addConvo.empty();
-    dataSet
-    Object.keys(dataSet).forEach(key => {
-        let idName = dataSet[key].name;
-        let chatListTitle = dataSet[key].document[0].chat_user_content;
+    dataSet.forEach(function (data) {
+        let idName = data[0];
+        let chatListTitle = data[4];
         let divConvo = $("<div></div>").addClass("convo")
             .attr("id",idName);
         let divLeft = $("<div></div>").addClass("left");
@@ -435,7 +431,6 @@ async function chatListup(dataSet){
         addConvo.append(divConvo);
     });
 }
-
 /**
  * 저장된 채팅 내역 데이터 불러오기
  * @param idName
@@ -471,20 +466,16 @@ async function loadChat(idName){
     await moveWindowScroll(message_box);
 }
 async function deleteChat(idName){
-    const deleteCating = $('#deleteCating');
-    const deleteId = $('#deleteId');
+    console.log(idName);
+    let deleteId = {"deleteId": idName}
 
-    deleteId.val(idName);
-
-    let formData = deleteCating.serializeArray();
-    console.log(formData);
     try {
         const response = await $.ajax({
-            url: "http://192.168.100.188:7860/doIndexDoc",
-            // url: "http://hub.aicasit.com/doIndexDoc",
+            url: "/api/delDialog",
             type: "POST",
+            contentType: 'application/json',
             dataType: "json",
-            data: formData,
+            data: deleteId,
         });
         console.log(response);
         if(response["status"]) {
