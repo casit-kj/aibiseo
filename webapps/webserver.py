@@ -11,16 +11,17 @@ from gevent.pywsgi import WSGIServer
 from webapps.webroutes import RouterManager
 
 class WebServer:    
-    def __init__(self, name, loggerManager, llmServer, configJsonData, flaskFolderStatic, flaskFoldertemplates):  
+    def __init__(self, name, loggerManager, dbServer, llmServer, configJsonData, flaskFolderStatic, flaskFoldertemplates):  
               
         self.app = Flask(name, static_folder=flaskFolderStatic, static_url_path='/static', 
                          template_folder=flaskFoldertemplates)
         self.loggerManager = loggerManager
         self.llmServer = llmServer
+        self.dbServer = dbServer
         self.configJsonData = configJsonData
         
         # Blueprint를 Flask 애플리케이션에 등록
-        router_manager = RouterManager(self.app, self.loggerManager, self.llmServer)
+        router_manager = RouterManager(self.app, self.loggerManager, self.dbServer, self.llmServer)
         self.set_logger()        
         
     

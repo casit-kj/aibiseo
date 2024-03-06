@@ -1,7 +1,7 @@
 {
     "basedir": "/data/bwllm/aibiseo",
     "modeldir": "/data/bwllm/models/",
-    "select_model": "KoAlpaca-Polyglot-12.8B",
+    "select_model": "casllm-base-7b-hf",
     "models": [
         {        
             "name": "casllm-base-7b-hf",
@@ -31,5 +31,13 @@
                 "skip_special_tokens": true
             }
         }      
-    ]
+    ],
+    "datasource": {
+        "url": "118.217.7.2",
+        "port": 3306,
+        "dbname": "chatbot",
+        "user": "bwis",
+        "passwd": "cas#3815B",
+        "charset": "utf8"
+    }
 }

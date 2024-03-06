@@ -10,6 +10,7 @@ pip install -r requirements.txt
 from module.mngcfg import ConfigManager, ConsolePrint
 from module.mnglogger import LoggingManager
 from module.llmserver import LLMServer
+from module.dbsource import DBSource
 from webapps.webserver import WebServer
 import os, sys
 import atexit
@@ -22,12 +23,21 @@ def callApplicationDispatch(name, appLogger, appConfig):
     basedir = appConfig.get_basedir()
     static_dir = os.path.join(basedir, "webapps/static")
     templates_dir = os.path.join(basedir, "webapps/templates")
-
-    llmServer = LLMServer(appLogger, appConfig.get_config_json())
-    llmServer.load_model()
     
-    daemon = WebServer(name, appLogger, llmServer, appConfig.get_config_json(), static_dir, templates_dir)
-    daemon.run(appConfig.get_port())
+    
+    json_configset = appConfig.get_config_json()
+    dbServer = DBSource(json_configset['datasource'])
+    dbServer.connection()
+          
+    if dbServer.is_alive():
+        dbServer.disconnection()
+        llmServer = LLMServer(appLogger, json_configset)
+        #llmServer.load_model()
+    
+        daemon = WebServer(name, appLogger, dbServer, llmServer, json_configset, static_dir, templates_dir)
+        daemon.run(appConfig.get_port())
+    else:
+        appLogger.printAppLogger("데이터베이스 연결에 문제가 있어 종료합니다.")
     
 if __name__ == '__main__':
     # Enviroment Config file Check

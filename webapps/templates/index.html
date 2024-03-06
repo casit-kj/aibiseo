@@ -10,6 +10,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>ChatGPT 예제</title>
     <script src="/static/js/rag.js"></script>
+    <script src="/static/js/icons.js"></script>
+
     <link rel="stylesheet" href="/static/css/rag.css">
     <script>
         const user_image        = `<img src="/static/images/user.png" alt="User Avatar">`;
@@ -17,127 +19,154 @@
     </script>
 </head>
 <body>
-    <div class="row">
-        <form name="bws_form" id="resultForm" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="cname" value="bwdocs" />
-            <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-            <input type="hidden" name="cmd" value="select" />
-            <input type="hidden" name="person" value="admin" />
-            <input type="hidden" name="attach" value="true" />
-            <input type="hidden" name="bw_QF" value="title,content">
-            <input type="hidden" name="bw_FF" value="title,img_file,owner_file,content,score" />
-            <input type="hidden" id="sort_input" name="bw_FS0" value="score desc" />
-            <input type="hidden" id="contentbw_QK" name="bw_QK"  value="" />
-    
-            <input type="hidden" id="bw_BA" name="bw_BA" value="true" />
-            <input type="hidden" name="bw_BF" value="section" />
-            <input type="hidden" name="bw_BC" value="true" />
-            <input type="hidden" name="bw_BL" value="3" />
-            <input type="hidden" name="bw_BN" value="true" />
-        </form>
-        <form name="insertChat" id="insertChat" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="cname" value="chatbot" />
-            <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-            <input type="hidden" name="cmd" value="add" />
-            <input type="hidden" name="bw_chat_user_id" id="chat_user_id" value="" />
-            <input type="hidden" name="bw_chat_dialog_id" id="chat_dialog_id" value="" />
-            <input type="hidden" name="bw_chat_create_at" id="chat_create_at" value="" />
-            <input type="hidden" name="bw_chat_qna_id" id="chat_qna_id" value="" />
-            <input type="hidden" name="bw_chat_qna_at" id="chat_qna_at" value="" />
-            <input type="hidden" name="bw_chat_user_content" id="chat_user_content" value="" />
-            <input type="hidden" name="bw_chat_assistant_content" id="chat_assistant_content" value="" />
-            <input type="hidden" name="bw_chat_assistant_endat" id="chat_assistant_endat" value="" />
-            <input type="hidden" name="bw_chat_assistant_startat" id="chat_assistant_startat" value="" />
-        </form>
-        <form name="listCating" id="listCating" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="cname" value="chatbot" />
-            <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-            <input type="hidden" name="cmd" value="select" />
-            <input type="hidden" name="bw_FS0" value="chat_create_at desc" />
-    
-            <input type="hidden" name="bw_BA" value="true" />
-            <input type="hidden" name="bw_BF" value="chat_dialog_id" />
-            <input type="hidden" name="bw_BC" value="true" />
-            <input type="hidden" name="bw_BN" value="true" />
-        </form>
-        <form name="loadCating" id="loadCating" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="cname" value="chatbot" />
-            <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-            <input type="hidden" name="cmd" value="select" />
-            <input type="hidden" name="bw_QF" value="chat_dialog_id">
-            <input type="hidden" id="loadId" name="bw_QK"  value="" />
-            <input type="hidden" name="bw_FS0" value="chat_qna_at asc" />
-        </form>
-        <div class="box conversations">
-            <div class="top" id="listBox">
-                <button class="new_convo" onclick="new_conversation()">
-                    <i class="fa-regular fa-plus"></i>
-                    <span>New Conversation</span>
-                </button>
-    <!--            <div class="convo" id="convo-{{chat_id}}">-->
-    <!--                <div class="left" onclick="set_conversation('{{chat_id}}')">-->
-    <!--                    <i class="fa-regular fa-comments"></i>-->
-    <!--                    <span class="convo-title">안녕하세요</span>-->
-    <!--                </div>-->
-    <!--                <i onclick="show_option('{{chat_id}}')" class="fa-regular fa-trash" id="conv-{{chat_id}}"></i>-->
-    <!--                <i onclick="delete_conversation('{{chat_id}}')" class="fa-regular fa-check" id="yes-{{chat_id}}" style="display:none;"></i>-->
-    <!--                <i onclick="hide_option('{{chat_id}}')" class="fa-regular fa-x" id="not-{{chat_id}}" style="display:none;"></i>-->
-    <!--            </div>-->
-    <!--            <div class="spinner"></div>-->
-            </div>
-            <div class="bottom_buttons">
-                <button onclick="chatList()">
-                    <i class="fa-regular fa-trash"></i>
-                    <span>Clear Conversations</span>
-                </button>
+    <input type="hidden" name="chat_user_id" id="user_id" value="" />
+    <input type="hidden" name="chat_dialog_id" id="dialog_id" value="" />
+    <input type="hidden" name="chat_create_at" id="create_at" value="" />
+<form name="bws_form" id="resultForm" method="POST" accept-charset="UTF-8">
+    <input type="hidden" name="cname" value="bwdocs" />
+    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
+    <input type="hidden" name="cmd" value="select" />
+    <input type="hidden" name="person" value="admin" />
+    <input type="hidden" name="attach" value="true" />
+    <input type="hidden" name="bw_QF" value="title,content">
+    <input type="hidden" name="bw_FF" value="title,img_file,owner_file,content,score" />
+    <input type="hidden" id="sort_input" name="bw_FS0" value="score desc" />
+    <input type="hidden" id="contentbw_QK" name="bw_QK"  value="" />
+
+    <input type="hidden" id="bw_BA" name="bw_BA" value="true" />
+    <input type="hidden" name="bw_BF" value="section" />
+    <input type="hidden" name="bw_BC" value="true" />
+    <input type="hidden" name="bw_BL" value="3" />
+    <input type="hidden" name="bw_BN" value="true" />
+</form>
+<form name="listCating" id="listCating" method="POST" accept-charset="UTF-8">
+    <input type="hidden" name="cname" value="chatbot" />
+    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
+    <input type="hidden" name="cmd" value="select" />
+    <input type="hidden" name="bw_FS0" value="chat_create_at desc" />
+
+    <input type="hidden" name="bw_BA" value="true" />
+    <input type="hidden" name="bw_BF" value="chat_dialog_id" />
+    <input type="hidden" name="bw_BC" value="true" />
+    <input type="hidden" name="bw_BN" value="true" />
+</form>
+<form name="loadCating" id="loadCating" method="POST" accept-charset="UTF-8">
+    <input type="hidden" name="cname" value="chatbot" />
+    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
+    <input type="hidden" name="cmd" value="select" />
+    <input type="hidden" name="bw_QF" value="chat_dialog_id">
+    <input type="hidden" id="loadId" name="bw_QK"  value="" />
+    <input type="hidden" name="bw_FS0" value="chat_qna_at asc" />
+</form>
+<form name="deleteCating" id="deleteCating" method="POST" accept-charset="UTF-8">
+    <input type="hidden" name="cname" value="chatbot" />
+    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
+    <input type="hidden" name="cmd" value="delete" />
+    <input type="hidden" id="deleteId"  name="bw_chat_dialog_id"  value="" />
+<!--    <input type="hidden" id="deleteId"  name="bw_QK"  value="" />-->
+<!--    <input type="hidden" name="bw_QF"  value="bw_chat_dialog_id" />-->
+
+</form>
+<div class="row">
+    <div class="box conversations">
+        <div class="top" id="listBox">
+            <button class="new_convo" onclick="new_conversation()">
+                <i class="fa-regular fa-plus"></i>
+                <span>New Conversation</span>
+            </button>
+            <div id="add_convo">
+
             </div>
         </div>
-        <div class="conversation disable-scrollbars">
-            <div class="stop_generating stop_generating-hidden">
-                <button id="cancelButton">
-                    <span>Stop Generating</span>
-                    <i class="fa-regular fa-stop"></i>
+        <div class="bottom_buttons" id="clear-conversations">
+            <button onclick="showClear()">
+                <i class="fa-regular fa-trash"></i>
+                <span>Clear Conversations</span>
+            </button>
+        </div>
+        <div class="bottom_buttons" id="confirm-conversations" style="display: none; flex-direction: row;">
+            <button onclick="clearConversations()" style="width: 50%;">
+                <i class="fa-regular fa-check"></i>
+                <span>확인</span>
+            </button>
+            <button onclick="hideClear()" style="width: 50%;">
+                <i class="fa-regular fa-x"></i>
+                <span>취소</span>
+            </button>
+        </div>
+    </div>
+    <div class="conversation disable-scrollbars">
+        <div class="stop_generating stop_generating-hidden">
+            <button id="cancelButton">
+                <span>Stop Generating</span>
+                <i class="fa-regular fa-stop"></i>
+            </button>
+        </div>
+        <div class="box" id="messages">
+<!--            <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"></div>-->
+        </div>
+        <div class="user-input">
+            <div class="box input-box">
+                <textarea id="message-input" placeholder="질문을 작성해주세요." cols="30" rows="1" style="white-space: pre-wrap; resize: none;" oninput="resizeTextarea(this)"></textarea>
+                <button  class="buttons" id="send-button" onclick="askGenAI()">
+                    입력
                 </button>
-            </div>
-            <div class="box" id="messages">
-            </div>
-            <div class="user-input">
-                <div class="box input-box">
-                    <textarea id="message-input" placeholder="Ask a question" cols="30" rows="10" style="white-space: pre-wrap;" oninput="resizeTextarea(this)"></textarea>
-                    <button id="send-button" onclick="askGenAI()">
-                        입력
-                    </button>
-                </div>
-            </div>
-            <div class="buttons">
+                <button class="buttons" id="openModal">자료</button>
+
             </div>
         </div>
-        <div class="box searchresults" style="display: none">
+    </div>
+
+</div>
+<!-- 모달 창 -->
+<div id="modalwindow" class="modal">
+    <!-- 모달 컨텐츠 -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>검색결과.</p>
+        <div class="box searchresults">
             <div class="top">
-                <span>검색결과</span>
                 <div class="resultbox">
                 </div>
             </div>
         </div>
     </div>
-    </body>
-    </html>
-    <script>
-        $(document).ready(function() {
-            $('#chat_user_id').val(uuid());
-            $('#chat_dialog_id').val(uuid());
-            const sendText = document.getElementById('message-input');
-    
-            sendText.addEventListener('keydown', function (event) {
-                // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
-                    askGenAI(); // 검색 버튼 클릭 실행
-                }
-                // 쉬프트+엔터의 경우 기본 동작(줄바꿈) 실행됨
-    
-    
-            });
-            chatList();
-        })
-    </script>
+</div>
+</body>
+</html>
+<script>
+    $(document).ready(function() {
+        $('#chat_user_id').val(uuid());
+        $('#chat_dialog_id').val(uuid());
+        const sendText = document.getElementById('message-input');
+
+        sendText.addEventListener('keydown', function (event) {
+            // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
+                askGenAI(); // 검색 버튼 클릭 실행
+            }
+            // 쉬프트+엔터의 경우 기본 동작(줄바꿈) 실행됨
+
+
+        });
+        chatList();
+
+        // 모달 열기
+        $("#openModal").click(function() {
+            $("#modalwindow").css("display", "block");
+        });
+
+        // 닫기 버튼으로 모달 닫기
+        $(".close").click(function() {
+            $("#modalwindow").css("display", "none");
+        });
+
+        // 모달 외부 클릭 시 모달 닫기
+        $(window).click(function(event) {
+            if ($(event.target).is("#modalwindow")) {
+                $("#modalwindow").css("display", "none");
+            }
+        });
+    })
+</script>

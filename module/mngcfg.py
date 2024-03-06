@@ -98,4 +98,5 @@ class ConsolePrint:
         local_time = time.localtime()
         formatted_time = time.strftime(ConsolePrint.time_format, local_time)
         spaces = ' ' * len(formatted_time)
-        print(f"{spaces}\t{msg}")     
+        print(f"{spaces}\t{msg}")
+     
