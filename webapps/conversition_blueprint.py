@@ -87,8 +87,7 @@ class ConversitionBlueprint:
     def generation(self, question, reference, past_dialog):        
         preprompt = "대화준비" 
         conversation = composit_question(preprompt, past_dialog, question, reference)            
-        self.loggerManager.printModelLogger(conversation)
-                                                                                     
+                                                                                    
         if self.llmServer.is_alive():                            
             answer = self.llmServer.generate(conversation)
             return answer
