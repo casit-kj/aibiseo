@@ -1,5 +1,6 @@
 torch
 flask
+kerberos
 pymysql
 gevent
 transformers
@@ -8,3 +9,4 @@ fairscale
 fire
 protobuf
 accelerate
+bitsandbytes

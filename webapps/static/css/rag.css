@@ -409,7 +409,12 @@ body {
     border: 1px solid #888;
     width: 50%; /* Could be more or less, depending on screen size */
 }
-
+.modal-content p{
+    text-align: center;
+    width: 100%;
+    cursor: move;
+    user-select: none;
+}
 /* 닫기 버튼 스타일 */
 .close {
     color: #aaa;
@@ -443,4 +448,17 @@ body {
 #add_convo {
     overflow: auto;
     max-height: 73vh;
+}
+
+.bwCom {
+    display: flex;
+    justify-content: center; /* 수평 중앙 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+    height: 100%;
+}
+
+.bwCom-Box {
+    padding: 20px; /* 내용과 테두리 사이의 여백 */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    font-size: 30px;
 }

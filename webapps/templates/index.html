@@ -39,34 +39,7 @@
     <input type="hidden" name="bw_BL" value="3" />
     <input type="hidden" name="bw_BN" value="true" />
 </form>
-<form name="listCating" id="listCating" method="POST" accept-charset="UTF-8">
-    <input type="hidden" name="cname" value="chatbot" />
-    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-    <input type="hidden" name="cmd" value="select" />
-    <input type="hidden" name="bw_FS0" value="chat_create_at desc" />
 
-    <input type="hidden" name="bw_BA" value="true" />
-    <input type="hidden" name="bw_BF" value="chat_dialog_id" />
-    <input type="hidden" name="bw_BC" value="true" />
-    <input type="hidden" name="bw_BN" value="true" />
-</form>
-<form name="loadCating" id="loadCating" method="POST" accept-charset="UTF-8">
-    <input type="hidden" name="cname" value="chatbot" />
-    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-    <input type="hidden" name="cmd" value="select" />
-    <input type="hidden" name="bw_QF" value="chat_dialog_id">
-    <input type="hidden" id="loadId" name="bw_QK"  value="" />
-    <input type="hidden" name="bw_FS0" value="chat_qna_at asc" />
-</form>
-<form name="deleteCating" id="deleteCating" method="POST" accept-charset="UTF-8">
-    <input type="hidden" name="cname" value="chatbot" />
-    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-    <input type="hidden" name="cmd" value="delete" />
-    <input type="hidden" id="deleteId"  name="bw_chat_dialog_id"  value="" />
-<!--    <input type="hidden" id="deleteId"  name="bw_QK"  value="" />-->
-<!--    <input type="hidden" name="bw_QF"  value="bw_chat_dialog_id" />-->
-
-</form>
 <div class="row">
     <div class="box conversations">
         <div class="top" id="listBox">
@@ -103,6 +76,9 @@
             </button>
         </div>
         <div class="box" id="messages">
+            <div class="start-Page">
+
+            </div>
 <!--            <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"></div>-->
         </div>
         <div class="user-input">
@@ -123,7 +99,7 @@
     <!-- 모달 컨텐츠 -->
     <div class="modal-content">
         <span class="close">&times;</span>
-        <p>검색결과.</p>
+        <p>검색결과</p>
         <div class="box searchresults">
             <div class="top">
                 <div class="resultbox">
@@ -136,8 +112,7 @@
 </html>
 <script>
     $(document).ready(function() {
-        $('#chat_user_id').val(uuid());
-        $('#chat_dialog_id').val(uuid());
+        wellcomeBox()
         const sendText = document.getElementById('message-input');
 
         sendText.addEventListener('keydown', function (event) {
@@ -162,11 +137,47 @@
             $("#modalwindow").css("display", "none");
         });
 
-        // 모달 외부 클릭 시 모달 닫기
-        $(window).click(function(event) {
-            if ($(event.target).is("#modalwindow")) {
-                $("#modalwindow").css("display", "none");
-            }
-        });
     })
+    // 모달 창을 드래그 가능하게 만드는 스크립트
+    // 모달 창의 "검색결과" 텍스트를 드래그하여 모달 창을 움직일 수 있습니다.
+
+    // 모달 요소와 "검색결과" 텍스트 요소를 변수에 저장합니다.
+    var modal = document.getElementById("modalwindow");
+    var header = document.querySelector(".modal-content p");
+
+    // 초기 위치를 저장할 변수를 선언합니다.
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    header.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // 마우스 커서의 시작 위치를 가져옵니다.
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // 마우스가 움직일 때마다 실행할 함수를 지정합니다.
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // 마우스의 새 위치를 계산합니다.
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // 요소의 새 위치를 설정합니다.
+        modal.style.top = (modal.offsetTop - pos2) + "px";
+        modal.style.left = (modal.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // 마우스 버튼을 놓으면 드래그를 멈춥니다.
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+
 </script>

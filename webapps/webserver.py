@@ -24,7 +24,6 @@ class WebServer:
         router_manager = RouterManager(self.app, self.loggerManager, self.dbServer, self.llmServer)
         self.set_logger()        
         
-    
     def set_logger(self):
         @self.app.after_request
         def after_request_logging(response):
@@ -47,3 +46,4 @@ class WebServer:
         http_server = WSGIServer(('0.0.0.0', int(port)), self.app)
         http_server.serve_forever()
         #self.app.run(debug=True, host='0.0.0.0', port=port)
+        

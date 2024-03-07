@@ -53,7 +53,8 @@ class DBSource:
     def insertDialog(self, data):   
             conn = self.connection()
             if(not self.is_alive()):
-                return False
+                return jsonify({"result":{
+                    "status": False, "code": "201", "message": "database connection is not alive"}}), False
             else:
                 try:
                     cursor = conn.cursor()
@@ -69,16 +70,20 @@ class DBSource:
                         cursor.execute(sql, (data['qna_id'], data['question'], data['answer'], data['end_at'], data['start_at'], data['dialog_id']))
                         # 변경사항 저장
                         conn.commit()
-                        return jsonify({"status": "success", "message": "Data inserted into database"}), True
+                        
+                        return ({"result":{
+                            "status": True, "code": "200", "answer": "Data inserted into database"}}), True
                     else:
-                        return jsonify({"status": "failed", "message": "Failed to inserted dataset"}), False               
-                except Exception as e:
-                    return jsonify({"status": "error", "message": str(e)}), False
+                        return ({"result":{
+                            "status": False, "code": "201", "answer": "Failed to inserted dataset"}}), False              
+                except Exception as e:                    
+                        return ({"result":{
+                            "status": False, "code": "400", "answer": str(e)}}), False     
                 finally:
-                    self.disconnection()                
-    def delete(self, delId):
-            print("확인")
-            print(delId)
+                    self.disconnection() 
+                    
+               
+    def deleteDialog(self, delId):
             conn = self.connection()
             if(not self.is_alive()):
                 return False
@@ -86,48 +91,108 @@ class DBSource:
                 try:
                     cursor = conn.cursor()
                     if cursor:
-                        dialogsql = "DELETE `chat_dialog` WHERE  `chat_dialog_id` = %s"
+                        dialogsql = "DELETE FROM chat_dialog WHERE  chat_dialog_id = %s"
                         # 쿼리 실행
                         cursor.execute(dialogsql, (delId['deleteId']))
                         # 변경사항 저장
                         conn.commit()                        
-                        sql = "DELETE `chat_qna` WHERE  `chat_dialog_id` = %s"
+                        sql = "DELETE FROM chat_qna WHERE  chat_dialog_id = %s"
                         # 쿼리 실행
                         cursor.execute(sql, (delId['deleteId']))
                         # 변경사항 저장
                         conn.commit()
-                        return jsonify({"status": "success", "message": "Data delete into database"}), True
+                        return ({"result":{
+                            "status": True, "code": "200", "answer": "Data delete into database"}}), True
                     else:
-                        return jsonify({"status": "failed", "message": "Failed to delete dataset"}), False               
+                        return ({"result":{
+                            "status": False, "code": "201", "answer": "Failed to delete dataset"}}), False              
                 except Exception as e:
-                    return jsonify({"status": "error", "message": str(e)}), False
+                    return ({"result":{
+                            "status": False, "code": "501", "answer": str(e)}}), False 
                 finally:
                     self.disconnection()  
-    
-    def update(self):
-        pass
+                    
+                    
     def chatlist(self):
         conn = self.connection()
-        print("확인")
         if(not self.is_alive()):
-            return "fail",False 
+            return "fail",False
         else:
             try:
                 cursor = conn.cursor()
                 if cursor:
                     # SELECT 쿼리 작성
                     sql = "SELECT cd.*, cq.* FROM chat_dialog cd LEFT JOIN chat_qna cq ON cd.chat_dialog_id = cq.chat_dialog_id INNER JOIN ( SELECT chat_dialog_id, MIN(chat_assistant_startat) AS earliest_created_at FROM chat_qna GROUP BY chat_dialog_id) AS earliest_cq ON cq.chat_dialog_id = earliest_cq.chat_dialog_id AND cq.chat_assistant_startat = earliest_cq.earliest_created_at ORDER BY cd.chat_dialog_id ASC;"
-                    
+
                     # 쿼리 실행
                     cursor.execute(sql)
                     
                     # 모든 결과 가져오기
                     result = cursor.fetchall()
-                    print(result)
-                    return result , True
+                    return ({"result":{
+                            "status": True, "code": "200", "answer": result}}), True
                 else:
-                    return "fail",False               
+                    return ({"result":{
+                            "status": False, "code": "201", "answer": "에러가 발생함"}}), False       
             except Exception as e:
                 return e,False
             finally:
                 self.disconnection()    
+                
+                
+    def clearConversations(self):
+            conn = self.connection()
+            if(not self.is_alive()):
+                return False
+            else:
+                try:
+                    cursor = conn.cursor()
+                    if cursor:
+                        dialogsql = "TRUNCATE TABLE chat_dialog"
+                        # 쿼리 실행
+                        cursor.execute(dialogsql)
+                        # 변경사항 저장
+                        conn.commit()                        
+                        sql = "TRUNCATE TABLE chat_qna"
+                        # 쿼리 실행
+                        cursor.execute(sql)
+                        # 변경사항 저장
+                        conn.commit()
+                        return ({"result":{
+                            "status": True, "code": "200", "answer": "Data clearConversations"}}), True
+                    else:
+                        return ({"result":{
+                            "status": False, "code": "201", "answer": "Failed to clearConversations"}}), False              
+                except Exception as e:
+                    return ({"result":{
+                            "status": False, "code": "400", "answer": str(e)}}), False  
+                finally:
+                    self.disconnection()       
+                      
+    def loadChat(self, loadChatId):
+            conn = self.connection()
+            if(not self.is_alive()):
+                return False
+            else:
+                try:
+                    cursor = conn.cursor()
+                    if cursor:      
+                        # 쿼리문               
+                        sql = "SELECT * FROM chat_qna WHERE  chat_dialog_id = %s ORDER BY chat_assistant_startat ASC"
+                        # 쿼리 실행
+                        cursor.execute(sql, (loadChatId['loadChatId']))
+                        
+                        # 검색결과문
+                        result = cursor.fetchall()
+                        # 변경사항 저장
+                        conn.commit()
+                        return ({"result":{
+                            "status": True, "code": "200", "answer": result}}), True
+                    else:
+                        return ({"result":{
+                            "status": True, "code": "200", "answer": "Failed to Chating dataset"}}), True           
+                except Exception as e:
+                    return ({"result":{
+                            "status": False, "code": "400", "answer": str(e)}}), False  
+                finally:
+                    self.disconnection()

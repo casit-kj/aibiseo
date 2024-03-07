@@ -7,18 +7,6 @@ function resizeTextarea(textarea) {
     textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
 }
 
-/**
- * 아이디 생성
- * @returns {string}
- */
-const message_id = () => {
-    random_bytes = (Math.floor(Math.random() * 1338377565) + 2956589730).toString(
-        2
-    );
-    unix = Math.floor(Date.now() / 1000).toString(2);
-
-    return BigInt(`0b${unix}${random_bytes}`).toString();
-};
 
 const remove_cancel_button = async () => {
     const stop_generating = $('.stop_generating');
@@ -33,6 +21,10 @@ const remove_cancel_button = async () => {
 
 async function askGenAI(){
     const message_input = $('#message-input');
+    if ($('#messages .bwCom').length > 0) {
+        // 'bwCom' 클래스를 가진 요소가 하나 이상 있을 경우, 'messages' div의 내용을 비웁니다.
+        $('#messages').empty();
+    }
     message_input.css('height','80px');
     message_input.focus();
     $(window).scrollTop(0); // 페이지의 맨 위로 스크롤
@@ -41,6 +33,7 @@ async function askGenAI(){
     if (message.length > 0) {
         message_input.value = ``;
         previousChat  = previousConversations();
+        await messageBoxGen(message);
         bw_dataset = await requestBWData(message);
         await searchResult(bw_dataset);
         arrayDataset = bwDatasetToArray(bw_dataset);
@@ -50,10 +43,54 @@ async function askGenAI(){
 }
 
 /**
+ * 답변창 생성
+ * @returns {Promise<void>}
+ */
+async function messageBoxGen(message){
+    const message_box = $('#messages');
+    const stop_generating = $('.stop_generating');
+
+
+    /**사용자 아이콘 및 질문 텍스트*/
+    let divMessage = $("<div></div>").addClass("message");
+    let divUser = $("<div></div>").addClass("user");
+    divUser.append(user_image);
+    divMessage.append(divUser);
+    let divContent= $("<div></div>").addClass("content")
+        .attr('id','user_temporary');
+    divContent.append(format(formattedText(message)));
+    divMessage.append(divContent);
+    message_box.append(divMessage);
+
+    /**사용자 대화창 자동 스크롤 기능 */
+    await moveWindowScroll(message_box);
+
+    stop_generating.removeClass('stop_generating-hidden');
+
+        /** GenAI 아이콘 및 답변창 */
+    let divgMessage = $("<div></div>").addClass("message");
+    let divgUser = $("<div></div>").addClass("user");
+    divgUser.append(brainwise_image);
+    divgMessage.append(divgUser);
+    let divgContent= $("<div></div>").addClass("content")
+        .attr('id','llm_temporary');
+    divgMessage.append(divgContent);
+    message_box.append(divgMessage);
+
+    /**GenAI 대화창 자동 스크롤 기능 */
+    await moveWindowScroll(message_box)
+
+}
+/**
  * 브레인와이즈 데이터 검색
  * @param {*} message
  */
 async function requestBWData(message){
+    const answerBox = $('#llm_temporary');
+    answerBox.empty();
+
+    answerBox.append("BrainWise 참고자료를 수집중입니다.... ")
+
     $('#contentbw_QK').val(format(message));
     const formSearch = $("#resultForm");
     const formSearchArray = formSearch.serializeArray();
@@ -95,10 +132,12 @@ async function moveWindowScroll(message_box) {
  */
 async function requestGenAI(message, arrayBwDataset, previousChat){
     const message_box = $('#messages');
-    const stop_generating = $('.stop_generating');
     const message_input = $('#message-input');
-    const chatQnaId = $('#chat_qna_id');
     const chatUserContent = $('#chat_user_content');
+    const answerBox = $('#llm_temporary');
+    answerBox.empty();
+
+    answerBox.append("답변을 생성중입니다....")
     // 입력초기화
     message_input.val('');
     message_input.html('');
@@ -107,42 +146,9 @@ async function requestGenAI(message, arrayBwDataset, previousChat){
     /**대화창 스크롤바 */
     window.scrollTo(0, 0);
     window.controller = new AbortController();
-    window.text = '';
-    window.token = message_id();
 
-    chatQnaId.val(window.token);
     chatUserContent.val(format(message));
 
-    stop_generating.removeClass('stop_generating-hidden');
-
-    /**사용자 아이콘 및 질문 텍스트*/
-    let divMessage = $("<div></div>").addClass("message");
-    let divUser = $("<div></div>").addClass("user");
-    divUser.append(user_image);
-    divMessage.append(divUser);
-    let divContent= $("<div></div>").addClass("content")
-        .attr('id','user_'+window.token);
-    divContent.append(format(message));
-    divMessage.append(divContent);
-    message_box.append(divMessage);
-
-    /**사용자 대화창 자동 스크롤 기능 */
-    await moveWindowScroll(message_box)
-
-    /** GenAI 아이콘 및 답변창 */
-    let divgMessage = $("<div></div>").addClass("message");
-    let divgUser = $("<div></div>").addClass("user");
-    divgUser.append(brainwise_image);
-    divgMessage.append(divgUser);
-    let divgContent= $("<div></div>").addClass("content")
-        .attr('id','llm_'+window.token);
-    let divgCursor = $("<div></div>").addClass("cursor");
-    divgContent.append(divgCursor);
-    divgMessage.append(divgContent);
-    message_box.append(divgMessage);
-
-    /**GenAI 대화창 자동 스크롤 기능 */
-    await moveWindowScroll(message_box)
 
     /** 라마 요청 */
     await requestGenAI_LLAMA(message_box, message, arrayBwDataset, previousChat)
@@ -163,7 +169,6 @@ async function requestGenAI(message, arrayBwDataset, previousChat){
  * @param previousChat
  */
 async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previousChat) {
-    const chatAssistantContent = $('#chat_assistant_content');
     const userId = $('#user_id');
     const dialogId = $('#dialog_id');
     const createAt = $('#create_at');
@@ -192,16 +197,20 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
             const datatset = response['result'];
             dialogId.val(datatset.dialog_id);
             createAt.val(datatset.dialog_create_at);
-            $(`#llm_${window.token}`).append(datatset.answer);
-            chatAssistantContent.val(datatset.answer);
+            const questionId = $('#user_temporary');
+            const answerId = $('#llm_temporary');
+            answerId.empty();
+            questionId.attr('id',"user_"+datatset.qna_id);
+            answerId.attr('id',"llm_"+datatset.qna_id);
+            $(`#llm_${datatset.qna_id}`).append(formattedText(datatset.answer));
             window.scrollTo(0, 0);
             await remove_cancel_button();
         } else {
 
             await remove_cancel_button();
-            $('#cursor').remove();
-            $(`#llm_${window.token}`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
-            chatAssistantContent.val(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
+            const answerId = $('#llm_temporary');
+            answerId.empty();
+            $(`#llm_temporary`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
 
             window.scrollTo(0, 0);
         }}
@@ -209,15 +218,15 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
 
         await remove_cancel_button();
         console.log(error);
-        $('#cursor').remove();
-
         if (error.name !== `AbortError`) {
-            $(`#llm_${window.token}`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요.`);
-            chatAssistantContent.val(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
+            const answerId = $('#llm_temporary');
+            answerId.empty();
+            $(`#llm_temporary`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요.`);
 
         } else {
-            $(`#llm_${window.token}`).append(` [중단됨]`);
-            chatAssistantContent.val(` [중단됨]`);
+            const answerId = $('#llm_temporary');
+            answerId.empty();
+            $(`#llm_temporary`).append(` [중단됨]`);
 
         }
 
@@ -227,57 +236,9 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
 
 
 /**
- * ChatGPT 요청
- * @param message_box
- * @param {*} message
+ * BWsearch 검색결과 출력
+ * @param {*} dataset 
  */
-async function requestGenAI_GPT(message_box, message){
-    let jsonSend = {};
-    jsonSend.query=message;
-    const jsonTpyeData = JSON.stringify(jsonSend);
-    console.log(jsonSend);
-    try {
-        const response = await $.ajax({
-            type: "POST",
-            url: 'http://hub.aicasit.com/api/chat',
-            dataType: "json",
-            data: jsonTpyeData,
-        });
-        console.log(response);
-        if(response['status']) {
-            const datatset = response['results'][0];
-            $(`#llm_${window.token}`).append(datatset.text);
-            window.scrollTo(0, 0);
-            await remove_cancel_button();
-        } else {
-
-            await remove_cancel_button();
-
-
-            $('#cursor').remove();
-            $(`#llm_${window.token}`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
-
-            window.scrollTo(0, 0);
-        }}
-    catch (error) {
-
-        await remove_cancel_button();
-
-
-        console.log(error);
-
-        $('#cursor').remove();
-
-        if (error.name !== `AbortError`) {
-            $(`#llm_${window.token}`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요.`);
-        } else {
-            $(`#llm_${window.token}`).append(` [중단됨]`);
-        }
-
-        window.scrollTo(0, 0);
-    }
-}
-
 async function searchResult(dataset){
     const resultbox = $('.resultbox');
     resultbox.empty();
@@ -293,6 +254,11 @@ async function searchResult(dataset){
     });
 }
 
+/**
+ * 챗봇 질문시 BW검색결과 추가
+ * @param {*} dataset 
+ * @returns 
+ */
 function bwDatasetToArray(dataset) {
     dataArray = []
     dataset.forEach(function (data) {
@@ -302,12 +268,13 @@ function bwDatasetToArray(dataset) {
 }
 
 /**
- * 채팅창 추가
+ * 새로운 채팅창 추가
  * @returns {Promise<void>}
  */
 async function new_conversation (){
-    $('#chat_user_id').val(uuid());
-    $('#chat_dialog_id').val(uuid());
+    $('#user_id').val("");
+    $('#dialog_id').val("");
+    $('#create_at').val("");
     const message_box = $('#messages');
     const message_input = $('#message-input');
 
@@ -319,10 +286,11 @@ async function new_conversation (){
 
     message_box.empty();
     await chatList();
+    wellcomeBox();
 }
 
 /**
- * 저장된 대화 불러오기
+ * 기존 대화문 저장
  * @returns {*[]}
  */
 function previousConversations(){
@@ -355,20 +323,7 @@ function previousConversations(){
     return messages;
 }
 
-/**
- * UUID생성
- * @returns {string}
- */
-const uuid = () => {
-    return `xxxxxxxx-xxxx-4xxx-yxxx-${Date.now().toString(16)}`.replace(
-        /[xy]/g,
-        function (c) {
-            var r = (Math.random() * 16) | 0,
-                v = c == "x" ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-        }
-    );
-};
+
 
 /**
  * 저장된 채팅 리스트 데이터 가져오기
@@ -386,7 +341,7 @@ async function chatList(){
         });
         console.log(response);
         if(response["status"]) {
-            const dataSet = response["result_Data"];
+            const dataSet = response["result_Data"]["result"]["answer"];
             await chatListup(dataSet);
         } else {
             console.log(response["result_Data"]);
@@ -437,38 +392,47 @@ async function chatListup(dataSet){
  * @returns {Promise<void>}
  */
 async function loadChat(idName){
-    const loadCating = $('#loadCating');
-    const loadId = $('#loadId');
+    const dialogId = $('#dialog_id');
     const message_box = $('#messages');
 
-    loadId.val(idName);
+    dialogId.val(idName);
 
-    let formData = loadCating.serializeArray();
-    console.log(formData);
+    let loadChatId = JSON.stringify({"loadChatId": idName})
+
     try {
         const response = await $.ajax({
-            url: "http://hub.aicasit.com/search",
+            url: "/api/loadChat",
             type: "POST",
             dataType: "json",
-            data: formData,
+            contentType: 'application/json',
+            data: loadChatId,
         });
         console.log(response);
         if(response["status"]) {
-            console.log(response["message"]);
-            const dataSet = response["results"]["document"];
+            const dataSet = response["result_Data"]["result"]["answer"];
             await loadChatList(dataSet);
         } else {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
         }
     } catch (error) {
         console.log(error);
     }
     await moveWindowScroll(message_box);
 }
-async function deleteChat(idName){
-    console.log(idName);
-    let deleteId = {"deleteId": idName}
 
+/**
+ * 대화 삭제
+ * @param {대화 아이디} idName 
+ */
+async function deleteChat(idName){
+    const dialogId = $('#dialog_id');
+
+    // 삭제하는 대화가 현재 진행중이 대화의 경우
+    if(dialogId.val() ===idName){
+        await new_conversation();
+    }
+
+    let deleteId = JSON.stringify({"deleteId": idName})
     try {
         const response = await $.ajax({
             url: "/api/delDialog",
@@ -479,10 +443,10 @@ async function deleteChat(idName){
         });
         console.log(response);
         if(response["status"]) {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
             await chatList();
         } else {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
         }
     } catch (error) {
         console.log(error);
@@ -495,15 +459,10 @@ async function deleteChat(idName){
  */
 async function loadChatList(dataSet){
     const message_box = $('#messages');
-    const insertOldData = dataSet[0];
-    const chatUserId = $('#chat_user_id');
-    const chatDialogId = $('#chat_dialog_id');
-    const chatCreate = $('#chat_create_at');
+
 
     message_box.empty();
-    chatUserId.val(insertOldData.chat_user_id);
-    chatDialogId.val(insertOldData.chat_dialog_id);
-    chatCreate.val(insertOldData.chat_create_at);
+
 
 
 
@@ -514,8 +473,8 @@ async function loadChatList(dataSet){
         divUser.append(user_image);
         divMessage.append(divUser);
                 let divContent= $("<div></div>").addClass("content")
-            .attr('id','user_'+data.chat_qna_id);
-        divContent.append(data.chat_user_content);
+            .attr('id','user_'+data[0]);
+        divContent.append(data[1]);
         divMessage.append(divContent);
         message_box.append(divMessage);
 
@@ -528,10 +487,10 @@ async function loadChatList(dataSet){
 
         /** GenAI 답변 */
         let divgContent= $("<div></div>").addClass("content")
-            .attr('id','llm_'+data.chat_qna_id);
+            .attr('id','llm_'+data[0]);
         let divgCursor = $("<div></div>").addClass("cursor");
         divgContent.append(divgCursor);
-        divgMessage.append(data.chat_assistant_content, divgContent);
+        divgMessage.append(formattedText(data[2]), divgContent);
         message_box.append(divgMessage);
     });
 
@@ -539,30 +498,24 @@ async function loadChatList(dataSet){
     /**GenAI 대화창 자동 스크롤 기능 */
     await moveWindowScroll(message_box);
 }
-
+/**
+ * 채팅 대화내역 전부 삭제
+ */
 async function clearConversations() {
-    const cname = {"name" : "cname","value":"chatbot"};
-    const cmd = {"name" : "cmd","value":"erase"};
-    const keycode = {"name" : "keycode","value":"8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a"};
-
-    let formData = [];
-    formData.push(cname,cmd,keycode)
-
-
-    console.log(formData);
     try {
         const response = await $.ajax({
-            url: "http://hub.aicasit.com/doIndexDoc",
-            type: "POST",
-            dataType: "json",
-            data: formData,
+            url: "/api/clearConversations",
+            type: "GET"
         });
         console.log(response);
         if(response["status"]) {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
+            await new_conversation();
             await chatList();
         } else {
-            console.log(response["message"]);
+            console.log(response["result_Data"]);
+            await new_conversation();
+            await chatList();
         }
     } catch (error) {
         console.log(error);
@@ -609,4 +562,21 @@ async function showClear(){
 async function hideClear(){
     $("#clear-conversations").show();
     $("#confirm-conversations").hide();
+}
+
+function wellcomeBox(){
+    const message_box = $('#messages');
+    let bwComDiv = $("<div></div>").addClass("bwCom");
+    let bwComBoxDiv = $("<div></div>").addClass("bwCom-Box");
+    let bwImageImg = $("<img>").attr("src","/static/images/brainwise128x128.png")
+        .attr("alt","brainwiseWellComeimage")
+        .css("border-radius","20px")
+        .css("margin-bottom","5px");
+    bwComBoxDiv.append(bwImageImg);
+    bwComBoxDiv.append("<br>무엇을 도와드릴까요?");
+    bwComDiv.append(bwComBoxDiv);
+    message_box.append(bwComDiv);
+}
+function formattedText(message){
+    return message.replace(/\n/g, "<br>");
 }
