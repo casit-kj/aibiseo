@@ -21,6 +21,7 @@ const remove_cancel_button = async () => {
 
 async function askGenAI(){
     const message_input = $('#message-input');
+    const chBox = $('#toggle-slider').is(':checked');
     if ($('#messages .bwCom').length > 0) {
         // 'bwCom' 클래스를 가진 요소가 하나 이상 있을 경우, 'messages' div의 내용을 비웁니다.
         $('#messages').empty();
@@ -34,9 +35,13 @@ async function askGenAI(){
         message_input.value = ``;
         previousChat  = previousConversations();
         await messageBoxGen(message);
-        bw_dataset = await requestBWData(message);
-        await searchResult(bw_dataset);
-        arrayDataset = bwDatasetToArray(bw_dataset);
+        if (chBox){
+            bw_dataset = await requestBWData(message);
+            await searchResult(bw_dataset);
+            arrayDataset = bwDatasetToArray(bw_dataset);
+        } else {
+            arrayDataset = [];
+        }
         await requestGenAI(message, arrayDataset, previousChat);
         await chatList();
     }
@@ -142,6 +147,7 @@ async function requestGenAI(message, arrayBwDataset, previousChat){
     message_input.val('');
     message_input.html('');
     message_input.text('');
+    $('#send-button').prop('disabled', true);
 
     /**대화창 스크롤바 */
     window.scrollTo(0, 0);
@@ -277,7 +283,7 @@ async function new_conversation (){
     $('#create_at').val("");
     const message_box = $('#messages');
     const message_input = $('#message-input');
-
+    $('#send-button').prop('disabled', true);
 
     // 입력초기화
     message_input.val('');
@@ -579,4 +585,90 @@ function wellcomeBox(){
 }
 function formattedText(message){
     return message.replace(/\n/g, "<br>");
+}
+
+$('#cancelButton').click(function() {
+    event.stopImmediatePropagation()
+  // window.controller.abort();
+  console.log('aborted ');
+});
+
+function loginModal(){
+    $("#modallogin").css("display", "block");
+}
+
+function registerModal(){
+    $("#modallogin").css("display", "none");
+    $("#modalregister").css("display", "block");
+}
+async function loginUser(){
+    const uName = $("#uname");
+    const uPsw = $("#upsw");
+
+    const pwTemp = sha256(uPsw.val());
+
+    const loginjson = {
+        "uname" : uName.val(),
+        "upsw" : pwTemp
+    }
+    console.log(loginjson);
+
+    let loginJson = JSON.stringify(loginjson)
+    try {
+        const response = await $.ajax({
+            url: "/api/login",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: loginJson,
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+            await chatList();
+        } else {
+            console.log(response["result_Data"]);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function registerUser(){
+    const uName = $("#registerUname");
+    const uPsw = $("#registerPsw");
+    const uPswCon = $("#registerPsw");
+
+    if (uPsw === uPswCon){
+        alert("비밀번호와 확인이 일치하지 않습니다.");
+        return false;
+    }
+
+    const pwTemp = sha256(uPsw.val());
+
+    const loginjson = {
+        "uname" : uName.val(),
+        "upsw" : pwTemp
+    }
+    console.log(loginjson);
+
+    let loginJson = JSON.stringify(loginjson)
+    try {
+        const response = await $.ajax({
+            url: "/api/register",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: loginJson,
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+            await chatList();
+        } else {
+            console.log(response["result_Data"]);
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }

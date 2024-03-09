@@ -14,6 +14,9 @@ from webapps.load_chat_blueprint import LoadChatBlueprint
 from webapps.clear_conversations_blueprint import ClearConversationsBlueprint
 from webapps.chat_list_blueprint import ChatListBlueprint
 from webapps.conversition_blueprint import ConversitionBlueprint
+from webapps.login_blueprint import ChatLoginBlueprint
+from webapps.register_blueprint import ChatUserRegisterBlueprint
+
 
 class RouterManager:
     def __init__(self, app, loggerManager, dbServer, llmServer):
@@ -41,7 +44,16 @@ class RouterManager:
             reqJsonData = request.get_json()
             handler = DeleteChatDialogBlueprint(self.loggerManager, self.dbServer)
             return handler.chatDeleteDialog(reqJsonData)
-        
+        @self.app.route("/api/login", methods=['POST'])
+        def loginUser():
+            reqJsonData = request.get_json()
+            handler = ChatLoginBlueprint(self.loggerManager, self.dbServer)
+            return handler.chatLogin(reqJsonData)
+        @self.app.route("/api/register", methods=['POST'])
+        def registerUser():
+            reqJsonData = request.get_json()
+            handler = ChatUserRegisterBlueprint(self.loggerManager, self.dbServer)
+            return handler.chatUserRegister(reqJsonData)
         @self.app.route("/api/clearConversations", methods=['GET'])
         def clearConversations():
             handler = ClearConversationsBlueprint(self.loggerManager, self.dbServer)

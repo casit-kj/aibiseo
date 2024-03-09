@@ -6,7 +6,7 @@ module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
 import pymysql
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,session
 import module.mhash
 
 class DBSource:        
@@ -65,7 +65,7 @@ class DBSource:
                         cursor.execute(dialogsql, (data['dialog_id'], data['user_id'], data['dialog_create_at'], data['dialog_id'], data['user_id'], data['dialog_create_at']))
                         # SQL 쿼리 작성
                         conn.commit()
-                        sql = "INSERT INTO `chat_qna` ( `chat_qna_id`, `chat_user_content`, `chat_assistant_content`, `chat_assistant_endat`, `chat_assistant_startat`,`chat_dialog_id`) VALUES ( %s, %s, %s, %s, %s, %s)"
+                        sql = "INSERT INTO `chat_qna` ( `chat_qna_id`, `chat_user_content`, `chat_assistant_content`, `chat_assistant_endat`, `chat_assistant_startat`,`chat_dialog_id`) VALUES ( %s, %s, %s, %s, %s, %s);"
                         # 쿼리 실행
                         cursor.execute(sql, (data['qna_id'], data['question'], data['answer'], data['end_at'], data['start_at'], data['dialog_id']))
                         # 변경사항 저장
@@ -91,12 +91,12 @@ class DBSource:
                 try:
                     cursor = conn.cursor()
                     if cursor:
-                        dialogsql = "DELETE FROM chat_dialog WHERE  chat_dialog_id = %s"
+                        dialogsql = "DELETE FROM chat_dialog WHERE  chat_dialog_id = %s;"
                         # 쿼리 실행
                         cursor.execute(dialogsql, (delId['deleteId']))
                         # 변경사항 저장
                         conn.commit()                        
-                        sql = "DELETE FROM chat_qna WHERE  chat_dialog_id = %s"
+                        sql = "DELETE FROM chat_qna WHERE  chat_dialog_id = %s;"
                         # 쿼리 실행
                         cursor.execute(sql, (delId['deleteId']))
                         # 변경사항 저장
@@ -148,12 +148,12 @@ class DBSource:
                 try:
                     cursor = conn.cursor()
                     if cursor:
-                        dialogsql = "TRUNCATE TABLE chat_dialog"
+                        dialogsql = "TRUNCATE TABLE chat_dialog;"
                         # 쿼리 실행
                         cursor.execute(dialogsql)
                         # 변경사항 저장
                         conn.commit()                        
-                        sql = "TRUNCATE TABLE chat_qna"
+                        sql = "TRUNCATE TABLE chat_qna;"
                         # 쿼리 실행
                         cursor.execute(sql)
                         # 변경사항 저장
@@ -178,7 +178,7 @@ class DBSource:
                     cursor = conn.cursor()
                     if cursor:      
                         # 쿼리문               
-                        sql = "SELECT * FROM chat_qna WHERE  chat_dialog_id = %s ORDER BY chat_assistant_startat ASC"
+                        sql = "SELECT * FROM chat_qna WHERE  chat_dialog_id = %s ORDER BY chat_assistant_startat ASC;"
                         # 쿼리 실행
                         cursor.execute(sql, (loadChatId['loadChatId']))
                         
@@ -196,3 +196,51 @@ class DBSource:
                             "status": False, "code": "400", "answer": str(e)}}), False  
                 finally:
                     self.disconnection()
+
+    def chatLogin(self, userInfo):
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    sql = "SELECT * FROM chat_user WHERE chat_user_name = %s AND chat_user_password= %s;"
+                    # 쿼리 실행
+                    cursor.execute(sql, (userInfo['uname'],userInfo['upsw']))
+                    # 변경사항 저장
+                    conn.commit()
+                    return ({"result": {
+                        "status": True, "code": "200", "answer": "login seucess"}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "login Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()
+    def userRegister(self, userInfo):
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    sql = "INSERT INTO `chat_user` (`chat_user_name`, `chat_user_password`) VALUES (%s,%s);"
+                    # 쿼리 실행
+                    cursor.execute(sql, (userInfo['uname'],userInfo['upsw']))
+                    # 변경사항 저장
+                    conn.commit()
+                    session['userid'] = userInfo['uname']
+                    return ({"result": {
+                        "status": True, "code": "200", "answer": "register seucess"}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "register Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()

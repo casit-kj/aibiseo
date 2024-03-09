@@ -8,6 +8,7 @@
     <link rel="manifest" href="/static/images/site.webmanifest">
     <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
     <title>ChatGPT 예제</title>
     <script src="/static/js/rag.js"></script>
     <script src="/static/js/icons.js"></script>
@@ -41,14 +42,20 @@
 </form>
 
 <div class="row">
-    <div class="box conversations">
+        <div class="box conversations">
+        <div class="bottom_buttons" id="clear-conversations">
+            <button onclick="loginModal()" style="background-color: #16101b66">
+                <i class="fa-regular fa-user"></i>
+                <span>로그인</span>
+            </button>
+        </div>
         <div class="top" id="listBox">
             <button class="new_convo" onclick="new_conversation()">
                 <i class="fa-regular fa-plus"></i>
                 <span>New Conversation</span>
             </button>
             <div id="add_convo">
-
+            <div class="spinner"></div>
             </div>
         </div>
         <div class="bottom_buttons" id="clear-conversations">
@@ -68,11 +75,11 @@
             </button>
         </div>
     </div>
+
     <div class="conversation disable-scrollbars">
         <div class="stop_generating stop_generating-hidden">
             <button id="cancelButton">
-                <span>Stop Generating</span>
-                <i class="fa-regular fa-stop"></i>
+                <span>  검색중  </span>
             </button>
         </div>
         <div class="box" id="messages">
@@ -83,8 +90,10 @@
         </div>
         <div class="user-input">
             <div class="box input-box">
-                <textarea id="message-input" placeholder="질문을 작성해주세요." cols="30" rows="1" style="white-space: pre-wrap; resize: none;" oninput="resizeTextarea(this)"></textarea>
-                <button  class="buttons" id="send-button" onclick="askGenAI()">
+                <input type="checkbox" id ="toggle-slider">
+                <label for="toggle-slider" class="toggle-label"></label>
+                <textarea id="message-input" placeholder="토글이 활성화 되면 질문에 검색자료를 첨부합니다." cols="30" rows="1" style="white-space: pre-wrap; resize: none;" oninput="resizeTextarea(this)"></textarea>
+                <button  class="buttons" id="send-button" onclick="askGenAI()" disabled>
                     입력
                 </button>
                 <button class="buttons" id="openModal">자료</button>
@@ -104,6 +113,44 @@
             <div class="top">
                 <div class="resultbox">
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 로그인 창 -->
+<div id="modallogin" class="modal">
+    <!-- 모달 컨텐츠 -->
+    <div class="modal-content">
+        <span class="close" id="loginclose">&times;</span>
+        <p>로그인</p>
+        <div class="box searchresults">
+            <div class="container">
+                <input type="text" id="uname" class="loginId" placeholder="사용자명 입력" required>
+
+                <input type="password" id="upsw" class="loginPw" placeholder="비밀번호 입력" required>
+
+                <button class="loginBtn" onclick="loginUser()">로그인</button>
+
+                <button class="loginBtn" onclick="registerModal()" style="margin-right: 5px; background-color: #272626">회원가입</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 로그인 창 -->
+<div id="modalregister" class="modal">
+    <!-- 모달 컨텐츠 -->
+    <div class="modal-content">
+        <span class="close" id="registerclose">&times;</span>
+        <p>로그인</p>
+        <div class="box searchresults">
+            <div class="container">
+                <input type="text" id="registerUname" class="loginId" placeholder="사용자명 입력" required>
+
+                <input type="password" id="registerPsw" class="loginPw" placeholder="비밀번호 입력" required>
+
+                <input type="password" id="registerPswCon" class="loginPw" placeholder="비밀번호 확인" required>
+
+                <button class="loginBtn" onclick="registerUser()">생성</button>
             </div>
         </div>
     </div>
@@ -135,8 +182,18 @@
         // 닫기 버튼으로 모달 닫기
         $(".close").click(function() {
             $("#modalwindow").css("display", "none");
+            $("#modallogin").css("display", "none");
+            $("#modalregister").css("display", "none");
         });
 
+        $('#message-input').on('input', function() {
+            if ($(this).val().length > 0) {
+            $('#send-button').prop('disabled', false);
+            }
+            else {
+                $('#send-button').prop('disabled', true);
+            }
+        });
     })
     // 모달 창을 드래그 가능하게 만드는 스크립트
     // 모달 창의 "검색결과" 텍스트를 드래그하여 모달 창을 움직일 수 있습니다.
