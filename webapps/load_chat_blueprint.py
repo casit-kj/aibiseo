@@ -17,7 +17,7 @@ class LoadChatBlueprint:
         self.loggerManager = loggerManager
         self.dbServer = dbServer
         
-    def loadChat(self, reqJsonData):
+    def loadChatList(self, reqJsonData):
         message, code = self.dbServer.loadChat(reqJsonData)       
         return jsonify({'result_Data': message,
                         'status':code})  

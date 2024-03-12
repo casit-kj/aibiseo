@@ -90,10 +90,10 @@ async function requestGenAI_GPT(message){
             const datatset = response['results'][0];
             $(`#gpt_${window.token}`).append(datatset.text);
             window.scrollTo(0, 0);
-            await remove_cancel_button();
+            await remove_search_button();
         } else {
             message_box.scrollTop = message_box.scrollHeight;
-            await remove_cancel_button();
+            await remove_search_button();
 
 
             $('#cursor').remove();
@@ -103,7 +103,7 @@ async function requestGenAI_GPT(message){
         }}
     catch (error) {
         message_box.scrollTop = message_box.scrollHeight;
-        await remove_cancel_button();
+        await remove_search_button();
 
 
         console.log(error);
@@ -120,6 +120,6 @@ async function requestGenAI_GPT(message){
     }
 
     message_box.scrollTop = message_box.scrollHeight;
-    await remove_cancel_button();
+    await remove_search_button();
 
 }

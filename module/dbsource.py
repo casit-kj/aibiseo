@@ -7,9 +7,9 @@ module.writer.email: jamesohe@gmail.com
 """
 import pymysql
 from flask import Flask, request, jsonify,session
-import module.mhash
 
-class DBSource:        
+
+class DBSource:
     def __init__(self, datasource):
         self.url = datasource['url']
         self.port = datasource['port']
@@ -18,7 +18,7 @@ class DBSource:
         self.passwd = datasource['passwd']
         self.charset = datasource['charset']
         self.DBConn = None
-    
+
     def print(self):
         print("Databse Information ...")    
         print(f"url: {self.url}")
@@ -62,7 +62,7 @@ class DBSource:
                         # SQL 쿼리 작성
                         dialogsql = "INSERT INTO `chat_dialog` (`chat_dialog_id`, `chat_user_id`, `chat_create_at`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE `chat_dialog_id` = %s, `chat_user_id` = %s, `chat_create_at` = %s ;"
                         # 쿼리 실행
-                        cursor.execute(dialogsql, (data['dialog_id'], data['user_id'], data['dialog_create_at'], data['dialog_id'], data['user_id'], data['dialog_create_at']))
+                        cursor.execute(dialogsql, (data['dialog_id'], data['chat_user_id'], data['dialog_create_at'], data['dialog_id'], data['chat_user_id'], data['dialog_create_at']))
                         # SQL 쿼리 작성
                         conn.commit()
                         sql = "INSERT INTO `chat_qna` ( `chat_qna_id`, `chat_user_content`, `chat_assistant_content`, `chat_assistant_endat`, `chat_assistant_startat`,`chat_dialog_id`) VALUES ( %s, %s, %s, %s, %s, %s);"
@@ -114,6 +114,11 @@ class DBSource:
                     
                     
     def chatlist(self):
+        if session.get('logged_in'):
+            user_id = session.get('uname')
+        else:
+            user_id = ''
+        print(user_id)
         conn = self.connection()
         if(not self.is_alive()):
             return "fail",False
@@ -122,13 +127,17 @@ class DBSource:
                 cursor = conn.cursor()
                 if cursor:
                     # SELECT 쿼리 작성
-                    sql = "SELECT cd.*, cq.* FROM chat_dialog cd LEFT JOIN chat_qna cq ON cd.chat_dialog_id = cq.chat_dialog_id INNER JOIN ( SELECT chat_dialog_id, MIN(chat_assistant_startat) AS earliest_created_at FROM chat_qna GROUP BY chat_dialog_id) AS earliest_cq ON cq.chat_dialog_id = earliest_cq.chat_dialog_id AND cq.chat_assistant_startat = earliest_cq.earliest_created_at ORDER BY cd.chat_dialog_id ASC;"
+                    sql = "SELECT cd.*, cq.* FROM chat_dialog cd LEFT JOIN chat_qna cq ON cd.chat_dialog_id = cq.chat_dialog_id INNER JOIN ( SELECT chat_dialog_id, MIN(chat_assistant_startat) AS earliest_created_at FROM chat_qna GROUP BY chat_dialog_id) AS earliest_cq ON cq.chat_dialog_id = earliest_cq.chat_dialog_id AND cq.chat_assistant_startat = earliest_cq.earliest_created_at WHERE cd.chat_user_id = %s ORDER BY cd.chat_dialog_id ASC;"
 
                     # 쿼리 실행
-                    cursor.execute(sql)
+                    cursor.execute(sql,user_id)
                     
                     # 모든 결과 가져오기
-                    result = cursor.fetchall()
+
+                    if session.get('logged_in'):
+                        result = cursor.fetchall()
+                    else:
+                        result = ''
                     return ({"result":{
                             "status": True, "code": "200", "answer": result}}), True
                 else:
@@ -141,6 +150,10 @@ class DBSource:
                 
                 
     def clearConversations(self):
+            if session.get('logged_in'):
+                chatuserid = session.get('uname')
+            else:
+                chatuserid = ""
             conn = self.connection()
             if(not self.is_alive()):
                 return False
@@ -148,14 +161,9 @@ class DBSource:
                 try:
                     cursor = conn.cursor()
                     if cursor:
-                        dialogsql = "TRUNCATE TABLE chat_dialog;"
+                        sql = "DELETE chat_dialog, chat_qna FROM chat_dialog LEFT JOIN chat_qna ON chat_dialog.chat_dialog_id = chat_qna.chat_dialog_id WHERE chat_dialog.chat_user_id = %s;"
                         # 쿼리 실행
-                        cursor.execute(dialogsql)
-                        # 변경사항 저장
-                        conn.commit()                        
-                        sql = "TRUNCATE TABLE chat_qna;"
-                        # 쿼리 실행
-                        cursor.execute(sql)
+                        cursor.execute(sql,chatuserid)
                         # 변경사항 저장
                         conn.commit()
                         return ({"result":{
@@ -178,7 +186,7 @@ class DBSource:
                     cursor = conn.cursor()
                     if cursor:      
                         # 쿼리문               
-                        sql = "SELECT * FROM chat_qna WHERE  chat_dialog_id = %s ORDER BY chat_assistant_startat ASC;"
+                        sql = "SELECT * FROM chat_qna WHERE chat_dialog_id = %s ORDER BY chat_assistant_startat ASC;"
                         # 쿼리 실행
                         cursor.execute(sql, (loadChatId['loadChatId']))
                         
@@ -208,10 +216,17 @@ class DBSource:
                     sql = "SELECT * FROM chat_user WHERE chat_user_name = %s AND chat_user_password= %s;"
                     # 쿼리 실행
                     cursor.execute(sql, (userInfo['uname'],userInfo['upsw']))
+                    result = cursor.fetchone()
                     # 변경사항 저장
                     conn.commit()
-                    return ({"result": {
-                        "status": True, "code": "200", "answer": "login seucess"}}), True
+                    session['uname'] = userInfo['uname']  # 사용자 ID 저장
+                    session['logged_in'] = True  # 로그인 상태 표시
+                    user_id = session.get('uname')
+                    if result:
+                        return ({"result": {
+                            "status": True, "code": "200", "answer": "login seucess", "session": user_id}}), True
+                    else:
+                        return ({"result": {"status": False, "code": "201", "answer": '아이디나 비밀번호가 일치하지 않습니다.'}}), False
                 else:
                     return ({"result": {
                         "status": False, "code": "201", "answer": "login Failed"}}), False
@@ -233,12 +248,71 @@ class DBSource:
                     cursor.execute(sql, (userInfo['uname'],userInfo['upsw']))
                     # 변경사항 저장
                     conn.commit()
-                    session['userid'] = userInfo['uname']
                     return ({"result": {
                         "status": True, "code": "200", "answer": "register seucess"}}), True
                 else:
                     return ({"result": {
                         "status": False, "code": "201", "answer": "register Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()
+    def userUpdate(self, userInfo):
+        if session.get('logged_in'):
+            chatuserid = session.get('uname')
+        else:
+            chatuserid = ""
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    sql = sql = "UPDATE chat_user SET chat_user_password = %s WHERE chat_user_name = %s;"
+                    # 쿼리 실행
+                    cursor.execute(sql, (userInfo['upsw'],chatuserid))
+                    # 변경사항 저장
+                    conn.commit()
+                    return ({"result": {
+                        "status": True, "code": "200", "answer": "update seucess"}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "update Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()
+
+    def chatuserDelete(self):
+        if session.get('logged_in'):
+            chatuserid = session.get('uname')
+        else:
+            chatuserid = ""
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    clearsql = "DELETE chat_dialog, chat_qna FROM chat_dialog LEFT JOIN chat_qna ON chat_dialog.chat_dialog_id = chat_qna.chat_dialog_id WHERE chat_dialog.chat_user_id = %s;"
+                    # 쿼리 실행
+                    cursor.execute(clearsql, chatuserid)
+                    # 변경사항 저장
+                    conn.commit()
+                    sql = sql = "DELETE FROM chat_user WHERE chat_user_name = %s;"
+                    # 쿼리 실행
+                    cursor.execute(sql, chatuserid)
+                    # 변경사항 저장
+                    conn.commit()
+                    return ({"result": {
+                        "status": True, "code": "200", "answer": "delete seucess"}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "delete Failed"}}), False
             except Exception as e:
                 return ({"result": {
                     "status": False, "code": "501", "answer": str(e)}}), False

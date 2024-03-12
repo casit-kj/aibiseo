@@ -6,7 +6,7 @@ module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 
 from webapps.delete_chat_dialog_blueprint import DeleteChatDialogBlueprint
 from webapps.index_blueprint import IndexBlueprint
@@ -14,8 +14,7 @@ from webapps.load_chat_blueprint import LoadChatBlueprint
 from webapps.clear_conversations_blueprint import ClearConversationsBlueprint
 from webapps.chat_list_blueprint import ChatListBlueprint
 from webapps.conversition_blueprint import ConversitionBlueprint
-from webapps.login_blueprint import ChatLoginBlueprint
-from webapps.register_blueprint import ChatUserRegisterBlueprint
+from webapps.userconfig_blueprint import ChatUserConfigBlueprint
 
 
 class RouterManager:
@@ -25,7 +24,7 @@ class RouterManager:
         self.dbServer = dbServer
         self.llmServer = llmServer
         self.register_routes()
-    
+
     def register_routes(self): 
                        
         @self.app.route("/")
@@ -37,7 +36,7 @@ class RouterManager:
         def loadChat():
             reqJsonData = request.get_json()
             handler = LoadChatBlueprint(self.loggerManager, self.dbServer)
-            return handler.loadChat(reqJsonData)
+            return handler.loadChatList(reqJsonData)
 
         @self.app.route("/api/delDialog", methods=['POST'])
         def delDialog():
@@ -47,13 +46,22 @@ class RouterManager:
         @self.app.route("/api/login", methods=['POST'])
         def loginUser():
             reqJsonData = request.get_json()
-            handler = ChatLoginBlueprint(self.loggerManager, self.dbServer)
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
             return handler.chatLogin(reqJsonData)
         @self.app.route("/api/register", methods=['POST'])
         def registerUser():
             reqJsonData = request.get_json()
-            handler = ChatUserRegisterBlueprint(self.loggerManager, self.dbServer)
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
             return handler.chatUserRegister(reqJsonData)
+        @self.app.route("/api/updateUser", methods=['POST'])
+        def updateUser():
+            reqJsonData = request.get_json()
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
+            return handler.chatUserUpdate(reqJsonData)
+        @self.app.route("/api/deleteUser", methods=['GET'])
+        def deleteUser():
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
+            return handler.chatUserDelete()
         @self.app.route("/api/clearConversations", methods=['GET'])
         def clearConversations():
             handler = ClearConversationsBlueprint(self.loggerManager, self.dbServer)
@@ -79,3 +87,13 @@ class RouterManager:
             reqJsonData = request.get_json()
             handler = ConversitionBlueprint(self.loggerManager, self.dbServer, self.llmServer)
             return handler.conversition(reqJsonData)
+        @self.app.route("/api/logout", methods=['GET'])
+        def chatLogout():
+            session.clear()
+            response_data = {
+                "status": True,
+                "results": {
+                    "answer": "로그아웃 되었습니다."
+                }
+            }
+            return response_data

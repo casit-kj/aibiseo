@@ -6,7 +6,7 @@ module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
 
-from flask import Blueprint, request, jsonify, Flask, render_template
+from flask import Blueprint, request, jsonify, Flask, render_template, session
 from module.mnglogger import LoggingManager
 from module.dbsource import DBSource
 
@@ -18,5 +18,5 @@ class ChatListBlueprint:
         
     def chatList(self):
         message, code = self.dbServer.chatlist()
-        return jsonify({'result_Data': message,'status':code})
+        return jsonify({'result_Data': message,'status':code,'loginconfirm': session.get('logged_in')})
    

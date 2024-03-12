@@ -6,3 +6,11 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+# IDEA config files
+.idea/
+workspace.xml
+vcs.xml
+modules.xmlmisc.xml
+aibiseo.iml
+

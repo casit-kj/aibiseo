@@ -52,7 +52,7 @@ const handle_ask = async () => {
 
 };
 
-const remove_cancel_button = async () => {
+const remove_search_button = async () => {
   stop_generating.classList.add(`stop_generating-hiding`);
 
   setTimeout(() => {
@@ -138,11 +138,11 @@ async function ask_gpt2(message){
   
       window.scrollTo(0, 0);
       message_box.scrollTo({ top: message_box.scrollHeight, behavior: "auto" });
-      await remove_cancel_button();
+      await remove_search_button();
     } 
   } catch (error) {
      message_box.scrollTop = message_box.scrollHeight;
-     await remove_cancel_button();
+     await remove_search_button();
      prompt_lock = false;
      await load_conversations(20, 0);
      console.log(error);
@@ -160,7 +160,7 @@ async function ask_gpt2(message){
     }
 
   message_box.scrollTop = message_box.scrollHeight;
-  await remove_cancel_button();
+  await remove_search_button();
   prompt_lock = false;
 
 }
@@ -298,7 +298,7 @@ const ask_gpt = async (message) => {
     add_message(window.conversation_id, "assistant", text);
 
     message_box.scrollTop = message_box.scrollHeight;
-    await remove_cancel_button();
+    await remove_search_button();
     prompt_lock = false;
 
     await load_conversations(20, 0);
@@ -307,7 +307,7 @@ const ask_gpt = async (message) => {
     add_message(window.conversation_id, "user", message);
 
     message_box.scrollTop = message_box.scrollHeight;
-    await remove_cancel_button();
+    await remove_search_button();
     prompt_lock = false;
 
     await load_conversations(20, 0);

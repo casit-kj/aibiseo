@@ -6,7 +6,7 @@ module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
 
-from flask import Blueprint, request, jsonify, Flask, render_template
+from flask import Blueprint, request, jsonify, Flask, render_template, session
 import time
 from datetime import datetime
 import module.mhash as support_module
@@ -41,7 +41,7 @@ class ConversitionBlueprint:
         json_dataset['answer'] = response_answer
         json_dataset['assistant_start_at'] = assistant_start_at
         json_dataset['assistant_end_at'] = assistant_end_at
-        
+
         # 결과를 데이터베이스에 저장한다.
         result, db_write_response = self.write_database(json_dataset)
         if not result:
@@ -67,7 +67,11 @@ class ConversitionBlueprint:
         return resultData
     
     # 데이터베이스에 저장
-    def write_database(self, dataset):                      
+    def write_database(self, dataset):
+        if session.get('logged_in'):
+            chatuserid = session.get('uname')
+        else:
+            chatuserid = ""
         put_data = {
                 "question": dataset['question'],
                 "answer": dataset['answer'],
@@ -76,7 +80,9 @@ class ConversitionBlueprint:
                 "dialog_create_at": dataset['dialog_create_at'],
                 "start_at": dataset['assistant_start_at'],
                 "end_at": dataset['assistant_end_at'],
-                "qna_id": dataset['qna_id']
+                "qna_id": dataset['qna_id'],
+                "chat_user_id": chatuserid
+
             }
         # DB 에 저장하는 부분
         message, result = self.dbServer.insertDialog(put_data)

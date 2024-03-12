@@ -5,6 +5,7 @@ module.create.date: 2024. 02. 21
 module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
+from datetime import timedelta
 
 from flask import Flask, request, jsonify
 from gevent.pywsgi import WSGIServer
@@ -19,7 +20,8 @@ class WebServer:
         self.llmServer = llmServer
         self.dbServer = dbServer
         self.configJsonData = configJsonData
-        
+        self.app.config['SECRET_KEY'] = 'casit'
+        self.app.permanent_session_lifetime = timedelta(minutes=30)
         # Blueprint를 Flask 애플리케이션에 등록
         router_manager = RouterManager(self.app, self.loggerManager, self.dbServer, self.llmServer)
         self.set_logger()        

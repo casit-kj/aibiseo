@@ -43,10 +43,22 @@
 
 <div class="row">
         <div class="box conversations">
-        <div class="bottom_buttons" id="clear-conversations">
-            <button onclick="loginModal()" style="background-color: #16101b66">
+        <div class="bottom_buttons" id="login-conversations">
+            <button onclick="loginModal()" style="background-color: #16101b66;">
                 <i class="fa-regular fa-user"></i>
-                <span>로그인</span>
+                <span>로그인 / 회원가입</span>
+            </button>
+        </div>
+        <div class="bottom_buttons" id="logout-conversations">
+            <button onclick="logoutUser()" style="background-color: #16101b66;">
+                <i class="fa-regular fa-user"></i>
+                <span>로그아웃</span>
+            </button>
+        </div>
+        <div class="bottom_buttons" id="userConfig">
+            <button onclick="userConfig()" style="background-color: #16101b66;">
+                <i class="fa-regular fa-user"></i>
+                <span>회원수정 / 삭제</span>
             </button>
         </div>
         <div class="top" id="listBox">
@@ -136,12 +148,12 @@
         </div>
     </div>
 </div>
-<!-- 로그인 창 -->
+<!--회원가입 창 -->
 <div id="modalregister" class="modal">
     <!-- 모달 컨텐츠 -->
     <div class="modal-content">
         <span class="close" id="registerclose">&times;</span>
-        <p>로그인</p>
+        <p>회원가입</p>
         <div class="box searchresults">
             <div class="container">
                 <input type="text" id="registerUname" class="loginId" placeholder="사용자명 입력" required>
@@ -151,6 +163,37 @@
                 <input type="password" id="registerPswCon" class="loginPw" placeholder="비밀번호 확인" required>
 
                 <button class="loginBtn" onclick="registerUser()">생성</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--회원 수정/삭제 창 -->
+<div id="modal-user-config" class="modal">
+    <!-- 모달 컨텐츠 -->
+    <div class="modal-content">
+        <span class="close" id="userconfigclose">&times;</span>
+        <p>사용자 비밀번호 변경</p>
+        <div class="box searchresults">
+            <div class="container">
+
+                <input type="password" id="updatePsw" class="loginPw" placeholder="비밀번호 입력" required>
+
+                <input type="password" id="updatePswCon" class="loginPw" placeholder="비밀번호 확인" required>
+                <div id="configButton">
+                    <button class="loginBtn" style="float: left; background-color: darkred;" onclick="showDeleteUser()">사용자 삭제</button>
+                    <button class="loginBtn" onclick="updateUser()">수정</button>
+                </div>
+                <div id="confirmDeleteButton" style="display: none">
+                    <span style="margin-top: 25px; width: 40%;float: left">사용자를 삭제하시겠습니까?</span>
+                    <button class="loginBtn"  onclick="deleteUser()" style="background-color: darkgreen">
+                        <i class="fa-regular fa-check"></i>
+                        <span>확인</span>
+                    </button>
+                    <button  class="loginBtn" onclick="hideDeleteUser()" style="background-color: darkred;margin-right: 5px">
+                        <i class="fa-regular fa-x"></i>
+                        <span>취소</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -184,8 +227,11 @@
             $("#modalwindow").css("display", "none");
             $("#modallogin").css("display", "none");
             $("#modalregister").css("display", "none");
+            $("#modal-user-config").css("display", "none");
+            hideDeleteUser();
         });
 
+        {#로그인 세션 활성화 글자수 일정이상 입력해야 입력버튼 활성화#}
         $('#message-input').on('input', function() {
             if ($(this).val().length > 0) {
             $('#send-button').prop('disabled', false);

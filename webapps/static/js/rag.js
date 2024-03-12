@@ -1,14 +1,26 @@
+/**
+ * 줄바꿈
+ * @param text
+ * @returns {*}
+ */
 const format = (text) => {
     return text.replace(/(?:\r\n|\r|\n)/g, "<br>");
 };
 
+/**
+ * 질문입력창 크기 조절
+ * @param textarea
+ */
 function resizeTextarea(textarea) {
     textarea.style.height = '80px';
     textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
 }
 
-
-const remove_cancel_button = async () => {
+/**
+ * 검색중 창 끄기
+ * @returns {Promise<void>}
+ */
+const remove_search_button = async () => {
     const stop_generating = $('.stop_generating');
 
     stop_generating.addClass('stop_generating-hiding'); // Hiding 클래스 추가
@@ -163,7 +175,7 @@ async function requestGenAI(message, arrayBwDataset, previousChat){
     // await requestGenAI_GPT(message_box, message)
 
 
-    await remove_cancel_button();
+    await remove_search_button();
     await moveWindowScroll(message_box)
 }
 
@@ -210,10 +222,10 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
             answerId.attr('id',"llm_"+datatset.qna_id);
             $(`#llm_${datatset.qna_id}`).append(formattedText(datatset.answer));
             window.scrollTo(0, 0);
-            await remove_cancel_button();
+            await remove_search_button();
         } else {
 
-            await remove_cancel_button();
+            await remove_search_button();
             const answerId = $('#llm_temporary');
             answerId.empty();
             $(`#llm_temporary`).append(`죄송합니다! 문제가 발생했습니다. 다시 시도해 주시거나 페이지를 새로고침 해주세요. `);
@@ -222,7 +234,7 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
         }}
     catch (error) {
 
-        await remove_cancel_button();
+        await remove_search_button();
         console.log(error);
         if (error.name !== `AbortError`) {
             const answerId = $('#llm_temporary');
@@ -278,6 +290,8 @@ function bwDatasetToArray(dataset) {
  * @returns {Promise<void>}
  */
 async function new_conversation (){
+    const addConvo = $('#add_convo');
+    addConvo.empty();
     $('#user_id').val("");
     $('#dialog_id').val("");
     $('#create_at').val("");
@@ -337,6 +351,11 @@ function previousConversations(){
  */
 async function chatList(){
     const insertChat = $('#listCating');
+    const loginConversations = $('#login-conversations');
+    const logoutConversations = $('#logout-conversations');
+    const clearConversations = $('#clear-conversations');
+    const messageInput  = $('#message-input');
+    const userConfig  = $('#userConfig');
 
     let formData = insertChat.serializeArray();
     console.log(formData);
@@ -348,7 +367,25 @@ async function chatList(){
         console.log(response);
         if(response["status"]) {
             const dataSet = response["result_Data"]["result"]["answer"];
-            await chatListup(dataSet);
+            const loginConfirm = response['loginconfirm'];
+            if (loginConfirm){
+                loginConversations.css("display", "none");
+                logoutConversations.css("display", "block");
+                clearConversations.css("display", "block");
+                userConfig.css("display", "block");
+                messageInput.prop('disabled', false);
+                messageInput.attr('placeholder','토글이 활성화 되면 질문에 검색자료를 첨부합니다.');
+            } else {
+                logoutConversations.css("display", "none");
+                loginConversations.css("display", "block");
+                clearConversations.css("display", "none");
+                userConfig.css("display", "none");
+                messageInput.prop('disabled', true);
+                messageInput.attr('placeholder','로그인후 이용해주세요');
+            }
+            if (dataSet !==""){
+                await chatListup(dataSet);
+            }
         } else {
             console.log(response["result_Data"]);
         }
@@ -368,14 +405,25 @@ async function chatListup(dataSet){
     addConvo.empty();
     dataSet.forEach(function (data) {
         let idName = data[0];
+        let cDateTime = data[2];
         let chatListTitle = data[4];
+        console.log(cDateTime);
+        // Date 객체 생성
+        let date = new Date(cDateTime);
+
+        // YYYY-MM-DDTHH:mm:ss.sssZ 형식으로 변환
+        let isoString = date.toISOString();
+
+        // YYYY-MM-DD HH:MM:SS 형식으로 변환
+        let formattedDateString = isoString.slice(0, 19).replace("T", " ");
+        console.log(formattedDateString);
         let divConvo = $("<div></div>").addClass("convo")
             .attr("id",idName);
         let divLeft = $("<div></div>").addClass("left");
         let iIcon = $("<i></i>").addClass("fa-regular fa-comments");
         let spanConvoTitle = $("<span></span>").addClass("convo-title")
             .text(chatListTitle)
-            .attr('onclick',"loadChat('"+idName+"')");
+            .attr('onclick',"loadChat('"+idName+"','"+formattedDateString+"')");
         let iShow = $("<i></i>").addClass("fa-regular fa-trash")
             .attr('onclick',"show_option('"+idName+"')")
             .attr('id',"conv-"+idName);
@@ -394,17 +442,20 @@ async function chatListup(dataSet){
 }
 /**
  * 저장된 채팅 내역 데이터 불러오기
- * @param idName
  * @returns {Promise<void>}
+ * @param idName
+ * @param cDateTime
  */
-async function loadChat(idName){
+async function loadChat(idName,cDateTime){
     const dialogId = $('#dialog_id');
     const message_box = $('#messages');
+    const createAt = $('#create_at');
 
     dialogId.val(idName);
+    createAt.val(cDateTime);
 
     let loadChatId = JSON.stringify({"loadChatId": idName})
-
+    console.log(loadChatId);
     try {
         const response = await $.ajax({
             url: "/api/loadChat",
@@ -465,12 +516,7 @@ async function deleteChat(idName){
  */
 async function loadChatList(dataSet){
     const message_box = $('#messages');
-
-
     message_box.empty();
-
-
-
 
     dataSet.forEach(function (data){
         /**사용자 아이콘 및 질문 텍스트*/
@@ -570,6 +616,9 @@ async function hideClear(){
     $("#confirm-conversations").hide();
 }
 
+/**
+ * 초기화면 출력
+ */
 function wellcomeBox(){
     const message_box = $('#messages');
     let bwComDiv = $("<div></div>").addClass("bwCom");
@@ -593,24 +642,39 @@ $('#cancelButton').click(function() {
   console.log('aborted ');
 });
 
+/**
+ * 로그인창 모달 열기
+ */
 function loginModal(){
+    $("#uname").val('');
+    $("#upsw").val('');
     $("#modallogin").css("display", "block");
 }
 
+/**
+ * 회원가입창 모달 열기
+ */
 function registerModal(){
     $("#modallogin").css("display", "none");
     $("#modalregister").css("display", "block");
 }
+
+/**
+ * 사용자 로그인
+ * @returns {Promise<boolean>}
+ */
 async function loginUser(){
     const uName = $("#uname");
     const uPsw = $("#upsw");
-
     const pwTemp = sha256(uPsw.val());
-
-    const loginjson = {
-        "uname" : uName.val(),
-        "upsw" : pwTemp
+    if (uName.length === 0 || uPsw.length === 0){
+        return false
     }
+    const loginjson = {
+    "uname" : uName.val(),
+    "upsw" : pwTemp
+    }
+
     console.log(loginjson);
 
     let loginJson = JSON.stringify(loginjson)
@@ -625,29 +689,72 @@ async function loginUser(){
         console.log(response);
         if(response["status"]) {
             console.log(response["result_Data"]);
+            $("#modallogin").css("display", "none");
             await chatList();
         } else {
             console.log(response["result_Data"]);
+            alert(response["result_Data"]['result']['answer']);
         }
     } catch (error) {
         console.log(error);
     }
 }
 
+/**
+ * 사용자 회원가입
+ * @returns {Promise<boolean>}
+ */
 async function registerUser(){
-    const uName = $("#registerUname");
-    const uPsw = $("#registerPsw");
-    const uPswCon = $("#registerPsw");
+    const uName = $("#registerUname").val();
+    const uPsw = $("#registerPsw").val();
+    const uPswCon = $("#registerPswCon").val();
+    console.log(uName.length);
+    //아이디 길이
+    if(uName.length < 4 || uName.length > 16) {
+        alert('아이디는 4자 이상 16자 이하여야 합니다.');
+        return false
+    }
 
-    if (uPsw === uPswCon){
+    // 아이디 특수문자 확인
+    if(!/^[a-zA-Z0-9_]*$/.test(uName)) {
+        alert('특수문자는 사용할 수 없습니다.');
+        return false
+    }
+
+    // // 비밀번호 길이 제한
+    // if(uPsw.length < 8) {
+    //     alert("비밀번호는 8자 이상이어야 합니다.");
+    //     return false;
+    // }
+    // 비밀번호확인
+    if (uPsw !== uPswCon){
         alert("비밀번호와 확인이 일치하지 않습니다.");
         return false;
     }
+    // // 비밀번호 복잡성 (문자, 숫자, 특수문자 혼합)
+    // const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+    // if(!pattern.test(uPsw)) {
+    //     alert("비밀번호는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+    //     return false;
+    // }
+    //
+    // // 비밀번호 사용자 정보 포함 여부 확인
+    // if(uPsw.toLowerCase().includes(uName.toLowerCase())) {
+    //     alert("비밀번호에 사용자 이름을 포함할 수 없습니다.");
+    //     return false;
+    // }
+    //
+    // // 연속 문자 제한 (예시로 3개 이상의 연속된 문자 제한)
+    // if(/(\w)\1\1/.test(uPsw)) {
+    //     alert("비밀번호에 3개 이상의 연속된 문자를 사용할 수 없습니다.");
+    //     return false;
+    // }
 
-    const pwTemp = sha256(uPsw.val());
+
+    const pwTemp = sha256(uPsw);
 
     const loginjson = {
-        "uname" : uName.val(),
+        "uname" : uName,
         "upsw" : pwTemp
     }
     console.log(loginjson);
@@ -664,7 +771,162 @@ async function registerUser(){
         console.log(response);
         if(response["status"]) {
             console.log(response["result_Data"]);
-            await chatList();
+            $("#modallogin").css("display", "none");
+            $("#modalregister").css("display", "none");
+            alert("아이디가 생성되었습니다.");
+
+        } else {
+            console.log(response["result_Data"]);
+            alert("중복된 아이디이거나 DB 오류 입니다.");
+        }
+    } catch (error) {
+        console.log(error);
+        alert(error);
+    }
+    $("#registerUname").val("");
+    $("#registerPsw").val("");
+    $("#registerPswCon").val("");
+}
+
+/**
+ * 사용자 로그아웃
+ * @returns {Promise<void>}
+ */
+async function logoutUser(){
+    try {
+        const response = await $.ajax({
+            url: "/api/logout",
+            type: "GET"
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+        } else {
+            console.log(response["result_Data"]);
+        }
+
+    } catch (error) {
+        console.log(error);
+    }
+    await chatList();
+    await new_conversation();
+}
+
+/**
+ * 회원정보 수정창 열기
+ */
+function userConfig(){
+    $("#modal-user-config").css("display", "block");
+}
+
+/**
+ * 회원정보 업데이트
+ * @returns {Promise<boolean>}
+ */
+async function updateUser(){
+    const uPsw = $("#updatePsw").val();
+    const uPswCon = $("#updatePswCon").val();
+
+
+    // // 비밀번호 길이 제한
+    // if(uPsw.length < 8) {
+    //     alert("비밀번호는 8자 이상이어야 합니다.");
+    //     return false;
+    // }
+    // 비밀번호확인
+    if (uPsw !== uPswCon){
+        alert("비밀번호와 확인이 일치하지 않습니다.");
+        return false;
+    }
+    // // 비밀번호 복잡성 (문자, 숫자, 특수문자 혼합)
+    // const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+    // if(!pattern.test(uPsw)) {
+    //     alert("비밀번호는 대소문자, 숫자, 특수문자를 모두 포함해야 합니다.");
+    //     return false;
+    // }
+    //
+    // // 비밀번호 사용자 정보 포함 여부 확인
+    // if(uPsw.toLowerCase().includes(uName.toLowerCase())) {
+    //     alert("비밀번호에 사용자 이름을 포함할 수 없습니다.");
+    //     return false;
+    // }
+    //
+    // // 연속 문자 제한 (예시로 3개 이상의 연속된 문자 제한)
+    // if(/(\w)\1\1/.test(uPsw)) {
+    //     alert("비밀번호에 3개 이상의 연속된 문자를 사용할 수 없습니다.");
+    //     return false;
+    // }
+
+
+    const pwTemp = sha256(uPsw);
+
+    const updatejson = {
+        "upsw" : pwTemp
+    }
+    console.log(updatejson);
+
+    let updateJson = JSON.stringify(updatejson)
+    try {
+        const response = await $.ajax({
+            url: "/api/updateUser",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: updateJson,
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+            $("#modal-user-config").css("display", "none");
+            alert("회원정보가 수정되었습니다.");
+
+        } else {
+            console.log(response["result_Data"]);
+            alert("사용하시던 비밀번호이거나 DB 오류 입니다.");
+        }
+    } catch (error) {
+        console.log(error);
+        alert(error);
+    }
+    $("#updatePsw").val("");
+    $("#updatePswCon").val("");
+}
+
+/**
+ * 회원삭제 확인
+ * @returns {Promise<void>}
+ */
+async function showDeleteUser(){
+    $("#configButton").hide();
+    $("#confirmDeleteButton").show();
+}
+
+/**
+ * 회원삭제 확인 닫기
+ * @returns {Promise<void>}
+ */
+async function hideDeleteUser(){
+    $("#configButton").show();
+    $("#confirmDeleteButton").hide();
+}
+
+/**
+ * 사용자 삭제
+ * @returns {Promise<void>}
+ */
+async function deleteUser(){
+
+    try {
+        const response = await $.ajax({
+            url: "/api/deleteUser",
+            type: "GET"
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+            await logoutUser();
+            $("#modal-user-config").css("display", "none");
+            alert("회원이 삭제 되었습니다.");
         } else {
             console.log(response["result_Data"]);
         }
