@@ -7,8 +7,8 @@ module.writer.email: jamesohe@gmail.com
 """
 
 from flask import Blueprint, request, jsonify, Flask, render_template, session
-from module.mnglogger import LoggingManager
-from module.dbsource import DBSource
+from libs.mods.mnglogger import LoggingManager
+from libs.mods.dbsource import DBSource
 
 
 class ChatListBlueprint:

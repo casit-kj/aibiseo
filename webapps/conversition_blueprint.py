@@ -9,11 +9,11 @@ module.writer.email: jamesohe@gmail.com
 from flask import Blueprint, request, jsonify, Flask, render_template, session
 import time
 from datetime import datetime
-import module.mhash as support_module
-from model.system_prompt import composit_question
-from module.mnglogger import LoggingManager
-from module.dbsource import DBSource
-from model.llm_server import LLMServer
+import libs.mods.mhash as support_module
+from libs.mods.mnglogger import LoggingManager
+from libs.mods.dbsource import DBSource
+from libs.llms.system_prompt import composit_question
+from libs.llms.llm_server import LLMServer
 
 class ConversitionBlueprint:
     def __init__(self, loggerManager, dbServer, llmServer):  

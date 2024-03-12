@@ -7,7 +7,7 @@ module.writer.email: jamesohe@gmail.com
 """
 
 from flask import Blueprint, request, jsonify, Flask, render_template
-from module.mnglogger import LoggingManager
+from libs.mods.mnglogger import LoggingManager
 
 class IndexBlueprint:
     def __init__(self, loggerManager):  

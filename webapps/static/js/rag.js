@@ -407,7 +407,6 @@ async function chatListup(dataSet){
         let idName = data[0];
         let cDateTime = data[2];
         let chatListTitle = data[4];
-        console.log(cDateTime);
         // Date 객체 생성
         let date = new Date(cDateTime);
 
