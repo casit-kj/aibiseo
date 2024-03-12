@@ -91,6 +91,8 @@ async function messageBoxGen(message){
     divgMessage.append(divgUser);
     let divgContent= $("<div></div>").addClass("content")
         .attr('id','llm_temporary');
+    let divgCursor = $("<div></div>").addClass("cursor");
+    divgContent.append(divgCursor);
     divgMessage.append(divgContent);
     message_box.append(divgMessage);
 
