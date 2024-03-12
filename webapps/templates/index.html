@@ -57,7 +57,7 @@
         </div>
         <div class="bottom_buttons" id="userConfig">
             <button onclick="userConfig()" style="background-color: #16101b66;">
-                <i class="fa-regular fa-user"></i>
+                <i class="fa-regular fa-cog"></i>
                 <span>회원수정 / 삭제</span>
             </button>
         </div>
@@ -241,46 +241,51 @@
             }
         });
     })
-    // 모달 창을 드래그 가능하게 만드는 스크립트
-    // 모달 창의 "검색결과" 텍스트를 드래그하여 모달 창을 움직일 수 있습니다.
+    // 모든 모달과 모달 헤더를 선택합니다.
+    let modals = document.querySelectorAll('.modal');
+    let headers = document.querySelectorAll('.modal-content p');
 
-    // 모달 요소와 "검색결과" 텍스트 요소를 변수에 저장합니다.
-    var modal = document.getElementById("modalwindow");
-    var header = document.querySelector(".modal-content p");
+    // 모달과 해당 헤더에 대해 드래그 기능을 설정하는 함수
+    function setDraggable(modal, header) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
-    // 초기 위치를 저장할 변수를 선언합니다.
-    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        header.onmousedown = dragMouseDown;
 
-    header.onmousedown = dragMouseDown;
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // 마우스 커서의 시작 위치를 가져옵니다.
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // 마우스가 움직일 때마다 실행할 함수를 지정합니다.
+            document.onmousemove = elementDrag;
+        }
 
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // 마우스 커서의 시작 위치를 가져옵니다.
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        // 마우스가 움직일 때마다 실행할 함수를 지정합니다.
-        document.onmousemove = elementDrag;
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // 마우스의 새 위치를 계산합니다.
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // 요소의 새 위치를 설정합니다.
+            modal.style.top = (modal.offsetTop - pos2) + "px";
+            modal.style.left = (modal.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // 마우스 버튼을 놓으면 드래그를 멈춥니다.
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
     }
 
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // 마우스의 새 위치를 계산합니다.
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // 요소의 새 위치를 설정합니다.
-        modal.style.top = (modal.offsetTop - pos2) + "px";
-        modal.style.left = (modal.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() {
-        // 마우스 버튼을 놓으면 드래그를 멈춥니다.
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
-
+    // 각 모달과 헤더에 대해 드래그 기능을 활성화합니다.
+    headers.forEach((header, index) => {
+        // 상응하는 모달을 찾아서 setDraggable 함수에 전달합니다.
+        let modal = modals[index]; // 헤더와 모달의 순서가 일치한다고 가정
+        setDraggable(modal, header);
+    });
 </script>

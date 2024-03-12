@@ -9,9 +9,9 @@ module.writer.email: jamesohe@gmail.com
 import os
 import torch
 from transformers import LlamaForCausalLM, LlamaTokenizer
-from module.mnglogger import LoggingManager
-from model.koalpaca import KoAlpaca
-from model.llama2hf import Llama2HF
+from libs.mods.mnglogger import LoggingManager
+from libs.llms.koalpaca import KoAlpaca
+from libs.llms.llama2hf import Llama2HF
 
 class LLMServer:
     def __init__(self, appLogger, configJsonData):

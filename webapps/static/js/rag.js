@@ -454,7 +454,6 @@ async function loadChat(idName,cDateTime){
     createAt.val(cDateTime);
 
     let loadChatId = JSON.stringify({"loadChatId": idName})
-    console.log(loadChatId);
     try {
         const response = await $.ajax({
             url: "/api/loadChat",
@@ -622,7 +621,7 @@ function wellcomeBox(){
     const message_box = $('#messages');
     let bwComDiv = $("<div></div>").addClass("bwCom");
     let bwComBoxDiv = $("<div></div>").addClass("bwCom-Box");
-    let bwImageImg = $("<img>").attr("src","/static/images/brainwise128x128.png")
+    let bwImageImg = $("<img>").attr("src","/static/images/ailogo.png")
         .attr("alt","brainwiseWellComeimage")
         .css("border-radius","20px")
         .css("margin-bottom","5px");

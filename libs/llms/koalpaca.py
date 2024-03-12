@@ -10,7 +10,7 @@ import os
 import torch
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 from transformers import LlamaForCausalLM, LlamaTokenizer
-from module.mnglogger import LoggingManager
+from libs.mods.mnglogger import LoggingManager
 
 class KoAlpaca:
     def __init__(self, appLogger, model_dir, model_name, model_config):

@@ -10,10 +10,10 @@ pip install -r requirements.txt
 
 import os, sys
 import atexit
-from module.mngcfg import ConfigManager, ConsolePrint
-from module.mnglogger import LoggingManager
-from module.dbsource import DBSource
-from model.llm_server import LLMServer
+from libs.mods.mngcfg import ConfigManager, ConsolePrint
+from libs.mods.mnglogger import LoggingManager
+from libs.mods.dbsource import DBSource
+from libs.llms.llm_server import LLMServer
 from webapps.webserver import WebServer
 
 
