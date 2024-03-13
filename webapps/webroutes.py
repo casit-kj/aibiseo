@@ -83,6 +83,8 @@ class RouterManager:
         def targetDelete():
             reqJsonData = request.get_json()
             handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
+            if session.get('uname') == reqJsonData['uName']:
+                session.clear()
             return handler.targetDeleteUser(reqJsonData)
         @self.app.route("/api/chat", methods=["POST"])
         def conversition():

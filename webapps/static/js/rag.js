@@ -1067,7 +1067,7 @@ async function targetUserDelete(uName){
 
     console.log(unamejson);
 
-    let uNameJson = JSON.stringify(uNamejson)
+    let uNameJson = JSON.stringify(unamejson)
     try {
         const response = await $.ajax({
             url: "/api/targetDelete",
