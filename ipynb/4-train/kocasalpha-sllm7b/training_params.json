@@ -39,7 +39,7 @@
     "model_ref": null,
     "dpo_beta": 0.1,
     "prompt_text_column": "prompt",
-    "text_column": "text",
+    "text_column": "dataset",
     "rejected_text_column": "rejected",
     "push_to_hub": false,
     "repo_id": null,
