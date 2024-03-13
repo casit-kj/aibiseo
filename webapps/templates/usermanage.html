@@ -23,23 +23,6 @@
     <input type="hidden" name="chat_user_id" id="user_id" value="" />
     <input type="hidden" name="chat_dialog_id" id="dialog_id" value="" />
     <input type="hidden" name="chat_create_at" id="create_at" value="" />
-<form name="bws_form" id="resultForm" method="POST" accept-charset="UTF-8">
-    <input type="hidden" name="cname" value="bwdocs" />
-    <input type="hidden" name="keycode" value="8e8aa899d03dc37653a99d887f6e22daf14ec163159d1e6e1ae9c9f0b1e22e1a" />
-    <input type="hidden" name="cmd" value="select" />
-    <input type="hidden" name="person" value="admin" />
-    <input type="hidden" name="attach" value="true" />
-    <input type="hidden" name="bw_QF" value="title,content">
-    <input type="hidden" name="bw_FF" value="title,img_file,owner_file,content,score" />
-    <input type="hidden" id="sort_input" name="bw_FS0" value="score desc" />
-    <input type="hidden" id="contentbw_QK" name="bw_QK"  value="" />
-
-    <input type="hidden" id="bw_BA" name="bw_BA" value="true" />
-    <input type="hidden" name="bw_BF" value="section" />
-    <input type="hidden" name="bw_BC" value="true" />
-    <input type="hidden" name="bw_BL" value="3" />
-    <input type="hidden" name="bw_BN" value="true" />
-</form>
 <div class="menu" >
     <nav class="clearfix">
         <ul class="clearfix">
@@ -61,66 +44,36 @@
             </button>
         </div>
         <div class="bottom_buttons" id="logout-conversations" style="display: none">
-            <button onclick="logoutUser('index')" style="background-color: #16101b66;">
+            <button onclick="logoutUser('usermanage')" style="background-color: #16101b66;">
                 <i class="fa-regular fa-user"></i>
                 <span>로그아웃</span>
-            </button>
-        </div>
-        <div class="bottom_buttons" id="userConfig" style="display:none;">
-            <button onclick="userConfig()" style="background-color: #16101b66;">
-                <i class="fa-regular fa-cog"></i>
-                <span>회원수정 / 삭제</span>
-            </button>
-        </div>
-        <div class="top" id="listBox">
-            <button class="new_convo" onclick="new_conversation()">
-                <i class="fa-regular fa-plus"></i>
-                <span>New Conversation</span>
-            </button>
-            <div id="add_convo">
-            <div class="spinner"></div>
-            </div>
-        </div>
-        <div class="bottom_buttons" id="clear-conversations">
-            <button onclick="showClear()">
-                <i class="fa-regular fa-trash"></i>
-                <span>Clear Conversations</span>
-            </button>
-        </div>
-        <div class="bottom_buttons" id="confirm-conversations" style="display: none; flex-direction: row;">
-            <button onclick="clearConversations()" style="width: 50%;">
-                <i class="fa-regular fa-check"></i>
-                <span>확인</span>
-            </button>
-            <button onclick="hideClear()" style="width: 50%;">
-                <i class="fa-regular fa-x"></i>
-                <span>취소</span>
             </button>
         </div>
     </div>
 
     <div class="conversation disable-scrollbars">
-        <div class="stop_generating stop_generating-hidden">
-            <button id="cancelButton">
-                <span>  검색중  </span>
-            </button>
-        </div>
-        <div class="box" id="messages">
-            <div class="start-Page">
+        <div class="box">
+            <div class="table-wrapper">
+                <div class="table-wrapper-box">
+                    <table class="user-table">
+                        <colgroup>
+                            <col width="15%">
+                            <col width="35%">
+                            <col width="50">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">No</th>
+                                <th scope="col">사용자명</th>
+                                <th scope="col">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
 
-            </div>
-<!--            <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"></div>-->
-        </div>
-        <div class="user-input">
-            <div class="box input-box">
-                <input type="checkbox" id ="toggle-slider">
-                <label for="toggle-slider" class="toggle-label"></label>
-                <textarea id="message-input" placeholder="토글이 활성화 되면 질문에 검색자료를 첨부합니다." cols="30" rows="4" style="white-space: pre-wrap; resize: none;" oninput="resizeTextarea(this)"></textarea>
-                <button  class="buttons" id="send-button" onclick="askGenAI()" disabled>
-                    입력
-                </button>
-                <button class="buttons" id="openModal">자료</button>
 
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -152,7 +105,7 @@
 
                 <input type="password" id="upsw" class="loginPw" placeholder="비밀번호 입력" required>
 
-                <button class="loginBtn" onclick="loginUser('index')">로그인</button>
+                <button class="loginBtn" onclick="loginUser('usermanage')">로그인</button>
 
                 <button class="loginBtn" onclick="registerModal()" style="margin-right: 5px; background-color: #272626">회원가입</button>
             </div>
@@ -191,12 +144,11 @@
 
                 <input type="password" id="updatePswCon" class="loginPw" placeholder="비밀번호 확인" required>
                 <div id="configButton">
-                    <button class="loginBtn" style="float: left; background-color: darkred;" onclick="showDeleteUser()">사용자 삭제</button>
-                    <button class="loginBtn" onclick="updateUser()">수정</button>
+                    <button class="loginBtn" onclick="showDeleteUser()">수정</button>
                 </div>
                 <div id="confirmDeleteButton" style="display: none">
-                    <span style="margin-top: 25px; width: 40%;float: left">사용자를 삭제하시겠습니까?</span>
-                    <button class="loginBtn"  onclick="deleteUser()" style="background-color: darkgreen">
+                    <span style="margin-top: 25px; width: 40%;float: left">사용자를 수정하시겠습니까?</span>
+                    <button class="loginBtn"  onclick="updateUser()" style="background-color: darkgreen">
                         <i class="fa-regular fa-check"></i>
                         <span>확인</span>
                     </button>
@@ -213,21 +165,7 @@
 </html>
 <script>
     $(document).ready(function() {
-        wellcomeBox()
-        const sendText = document.getElementById('message-input');
-
-        sendText.addEventListener('keydown', function (event) {
-            // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
-                askGenAI(); // 검색 버튼 클릭 실행
-            }
-            // 쉬프트+엔터의 경우 기본 동작(줄바꿈) 실행됨
-
-
-        });
-        chatList();
-
+        userTable();
         // 모달 열기
         $("#openModal").click(function() {
             $("#modalwindow").css("display", "block");

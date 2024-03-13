@@ -261,6 +261,8 @@ class DBSource:
     def userUpdate(self, userInfo):
         if session.get('logged_in'):
             chatuserid = session.get('uname')
+        elif userInfo['uname'] != "":
+            chatuserid = userInfo['uname']
         else:
             chatuserid = ""
         conn = self.connection()
@@ -270,7 +272,7 @@ class DBSource:
             try:
                 cursor = conn.cursor()
                 if cursor:
-                    sql = sql = "UPDATE chat_user SET chat_user_password = %s WHERE chat_user_name = %s;"
+                    sql = "UPDATE chat_user SET chat_user_password = %s WHERE chat_user_name = %s;"
                     # 쿼리 실행
                     cursor.execute(sql, (userInfo['upsw'],chatuserid))
                     # 변경사항 저장
@@ -313,6 +315,61 @@ class DBSource:
                 else:
                     return ({"result": {
                         "status": False, "code": "201", "answer": "delete Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()
+
+
+
+    def userTableList(self):
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    sql = "SELECT chat_user_name FROM chat_user ORDER BY idchat_user ASC"
+                    # 쿼리 실행
+                    cursor.execute(sql)
+
+                    # 변경사항 저장
+                    conn.commit()
+                    if session.get('logged_in'):
+                        result = cursor.fetchall()
+                    else:
+                        result = ''
+                    return ({"result":{
+                            "status": True, "code": "200", "answer": result}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "load userData Failed"}}), False
+            except Exception as e:
+                return ({"result": {
+                    "status": False, "code": "501", "answer": str(e)}}), False
+            finally:
+                self.disconnection()
+
+    def targetDeleteUser(self,userInfo):
+        conn = self.connection()
+        if (not self.is_alive()):
+            return False
+        else:
+            try:
+                cursor = conn.cursor()
+                if cursor:
+                    sql = "DELETE FROM chat_user WHERE chat_user_name =%s;"
+                    # 쿼리 실행
+                    cursor.execute(sql,userInfo['uName'])
+                    # 변경사항 저장
+                    conn.commit()
+                    return ({"result":{
+                            "status": True, "code": "200", "answer": userInfo['uName']+'사용자가 삭제되었습니다'}}), True
+                else:
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": "삭제 되지 않았습니다."}}), False
             except Exception as e:
                 return ({"result": {
                     "status": False, "code": "501", "answer": str(e)}}), False

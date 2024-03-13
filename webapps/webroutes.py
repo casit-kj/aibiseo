@@ -31,7 +31,10 @@ class RouterManager:
         def index():
             handler = IndexBlueprint(self.loggerManager)
             return handler.index()      
-        
+        @self.app.route("/usermanage")
+        def usermanage():
+            handler = IndexBlueprint(self.loggerManager)
+            return handler.usermanage()
         @self.app.route("/api/loadChat", methods=['POST'])
         def loadChat():
             reqJsonData = request.get_json()
@@ -70,8 +73,17 @@ class RouterManager:
         @self.app.route("/api/chatList", methods=['GET'])        
         def chatList():
             handler = ChatListBlueprint(self.loggerManager, self.dbServer)
-            return handler.chatList()     
-        
+            return handler.chatList()
+
+        @self.app.route("/api/userTable", methods=['GET'])
+        def userTable():
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
+            return handler.userTableList()
+        @self.app.route("/api/targetDelete", methods=['POST'])
+        def targetDelete():
+            reqJsonData = request.get_json()
+            handler = ChatUserConfigBlueprint(self.loggerManager, self.dbServer)
+            return handler.targetDeleteUser(reqJsonData)
         @self.app.route("/api/chat", methods=["POST"])
         def conversition():
             # Validate dataType                      

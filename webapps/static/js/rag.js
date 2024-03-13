@@ -663,7 +663,7 @@ function registerModal(){
  * 사용자 로그인
  * @returns {Promise<boolean>}
  */
-async function loginUser(){
+async function loginUser(pageConfirm){
     const uName = $("#uname");
     const uPsw = $("#upsw");
     const pwTemp = sha256(uPsw.val());
@@ -690,7 +690,12 @@ async function loginUser(){
         if(response["status"]) {
             console.log(response["result_Data"]);
             $("#modallogin").css("display", "none");
-            await chatList();
+            if (pageConfirm ==="index"){
+                await chatList();
+            } else if(pageConfirm ==="usermanage"){
+                await userTable();
+            }
+
         } else {
             console.log(response["result_Data"]);
             alert(response["result_Data"]['result']['answer']);
@@ -792,7 +797,7 @@ async function registerUser(){
  * 사용자 로그아웃
  * @returns {Promise<void>}
  */
-async function logoutUser(){
+async function logoutUser(pageConfirm){
     try {
         const response = await $.ajax({
             url: "/api/logout",
@@ -808,8 +813,13 @@ async function logoutUser(){
     } catch (error) {
         console.log(error);
     }
-    await chatList();
-    await new_conversation();
+    if (pageConfirm ==="index"){
+        await chatList();
+        await new_conversation();
+    } else if(pageConfirm ==="usermanage"){
+        await userTable();
+    }
+
 }
 
 /**
@@ -824,6 +834,7 @@ function userConfig(){
  * @returns {Promise<boolean>}
  */
 async function updateUser(){
+    const uName = $("#user_id").val();
     const uPsw = $("#updatePsw").val();
     const uPswCon = $("#updatePswCon").val();
 
@@ -861,7 +872,8 @@ async function updateUser(){
     const pwTemp = sha256(uPsw);
 
     const updatejson = {
-        "upsw" : pwTemp
+        "upsw" : pwTemp,
+        "uname":uName
     }
     console.log(updatejson);
 
@@ -924,11 +936,153 @@ async function deleteUser(){
         console.log(response);
         if(response["status"]) {
             console.log(response["result_Data"]);
-            await logoutUser();
+            await logoutUser('index');
             $("#modal-user-config").css("display", "none");
             alert("회원이 삭제 되었습니다.");
         } else {
             console.log(response["result_Data"]);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function userTable(){
+    const loginConversations = $('#login-conversations');
+    const logoutConversations = $('#logout-conversations');
+    const userTable = $('#user-table-body');
+    try {
+        const response = await $.ajax({
+            url: "/api/userTable",
+            type: "GET"
+        });
+        console.log(response);
+        if(response["status"]) {
+            const dataSet = response["result_Data"]["result"]["answer"];
+            const loginConfirm = response['loginconfirm'];
+            if (loginConfirm){
+                loginConversations.css("display", "none");
+                logoutConversations.css("display", "block");
+            } else {
+                logoutConversations.css("display", "none");
+                loginConversations.css("display", "block");
+                userTable.empty();
+            }
+            if (dataSet !==""){
+                await userTableBody(dataSet);
+            }
+        } else {
+            console.log(response["result_Data"]);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function userTableBody(dataSet){
+    const userTable = $('#user-table-body');
+
+    userTable.empty();
+    dataSet.forEach(function (data,index) {
+        let trU = $("<tr></tr>");
+        let tdIdex = $("<td></td>").addClass("noBorder")
+            .text(index+1);
+        let tdName = $("<td></td>").addClass("noBorder")
+            .text(data[0]);
+        let tdButton = $("<td></td>").addClass("noBorder");
+        let buttonUpdate = $("<button></button>").addClass("button-manage user-update")
+            .attr('id','buttonUpdate'+index)
+            .text('수정')
+            .attr('onclick',"userUpdateModal('"+data[0]+"');");
+
+        let buttonDeleteCheckConfirm = $("<button></button>").addClass("button-manage user-delete")
+            .attr('id','buttonCheckConfirm'+index)
+            .text('삭제')
+            .attr('onclick',"deleteCheckConfirm('"+index+"');");
+
+        let buttonCheckCancle = $("<button></button>").addClass("button-manage user-delete")
+            .css('display','none')
+            .attr('id','buttonCheckCancle'+index)
+            .text('취소')
+            .attr('onclick',"checkCancle('"+index+"');");
+
+        let buttonDelete = $("<button></button>").addClass("button-manage user-update")
+            .css('display','none')
+            .attr('id','buttonDelete'+index)
+            .text('확인')
+            .attr('onclick',"targetUserDelete('"+data[0]+"');");
+
+        let spanConfirm = $("<span></span>").text("계정을 삭제하시겠습니까?")
+            .attr('id','spanConfirm'+index)
+            .css('display','none');
+
+        tdButton.append(spanConfirm,buttonUpdate, buttonDeleteCheckConfirm,buttonCheckCancle,buttonDelete);
+        trU.append(tdIdex,tdName,tdButton);
+        userTable.append(trU);
+    })
+}
+
+/**
+ * 유저 데이터 변경
+ * @param username
+ */
+function userUpdateModal(username){
+    $('#user_id').val(username);
+    $('#modal-user-config').show();
+
+}
+
+/**
+ * 유저 데이터 삭제 확인
+ * @param index
+ */
+function deleteCheckConfirm(index){
+    $('#buttonUpdate'+index).hide();
+    $('#buttonCheckConfirm'+index).hide();
+    $('#buttonCheckCancle'+index).show();
+    $('#buttonDelete'+index).show();
+    $('#spanConfirm'+index).show();
+}
+
+/**
+ * 유저데이터 삭제 취소
+ * @param index
+ */
+function checkCancle(index){
+    $('#buttonUpdate'+index).show();
+    $('#buttonCheckConfirm'+index).show();
+    $('#buttonCheckCancle'+index).hide();
+    $('#buttonDelete'+index).hide();
+    $('#spanConfirm'+index).hide();
+}
+
+/**
+ * 유저데이터 삭제
+ * @param uName
+ */
+async function targetUserDelete(uName){
+    const unamejson = {
+    "uName" : uName,
+    }
+
+    console.log(unamejson);
+
+    let uNameJson = JSON.stringify(uNamejson)
+    try {
+        const response = await $.ajax({
+            url: "/api/targetDelete",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: uNameJson,
+        });
+        console.log(response);
+        if(response["status"]) {
+            console.log(response["result_Data"]);
+            await userTable();
+        } else {
+            console.log(response["result_Data"]);
+            alert(response["result_Data"]['result']['answer']);
         }
     } catch (error) {
         console.log(error);

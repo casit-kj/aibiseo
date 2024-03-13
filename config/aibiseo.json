@@ -1,6 +1,6 @@
 {
-    "basedir": "/data/bwllm/aibiseo",
-    "modeldir": "/data/bwllm/models/",
+    "basedir": "/home/bwis/aibiseo",
+    "modeldir": "/data/aibiseo/models/",
     "select_model": "KoAlpaca-Polyglot-12.8B",
 
     "datasource": {

@@ -15,3 +15,6 @@ class IndexBlueprint:
         
     def index(self):
         return render_template('index.html')
+
+    def usermanage(self):
+        return render_template('usermanage.html')

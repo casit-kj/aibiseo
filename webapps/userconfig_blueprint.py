@@ -5,7 +5,7 @@ module.create.date: 2024. 02. 21
 
 """
 
-from flask import Blueprint, request, jsonify, Flask, render_template
+from flask import Blueprint, request, jsonify, Flask, render_template, session
 from libs.mods.mnglogger import LoggingManager
 from libs.mods.dbsource import DBSource
 
@@ -32,4 +32,13 @@ class ChatUserConfigBlueprint:
         message, code = self.dbServer.chatuserDelete()
         return jsonify({'result_Data': message,
                         'status':code})
-   
+
+    def userTableList(self):
+        message, code = self.dbServer.userTableList()
+        return jsonify({'result_Data': message,
+                        'status':code,'loginconfirm': session.get('logged_in')})
+
+    def targetDeleteUser(self,reqJsonData):
+        message, code = self.dbServer.targetDeleteUser(reqJsonData)
+        return jsonify({'result_Data': message,
+                        'status':code})
