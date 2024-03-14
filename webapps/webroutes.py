@@ -5,15 +5,19 @@ module.create.date: 2024. 02. 21
 module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
+import os
 
 from flask import Flask, render_template, jsonify, request, session
 
+from libs.mods import mnglogger
+from libs.mods.mnglogger import LoggingManager
 from webapps.delete_chat_dialog_blueprint import DeleteChatDialogBlueprint
 from webapps.index_blueprint import IndexBlueprint
 from webapps.load_chat_blueprint import LoadChatBlueprint
 from webapps.clear_conversations_blueprint import ClearConversationsBlueprint
 from webapps.chat_list_blueprint import ChatListBlueprint
 from webapps.conversition_blueprint import ConversitionBlueprint
+from webapps.log_blueprint import LogControlBlueprint
 from webapps.userconfig_blueprint import ChatUserConfigBlueprint
 
 
@@ -35,6 +39,10 @@ class RouterManager:
         def usermanage():
             handler = IndexBlueprint(self.loggerManager)
             return handler.usermanage()
+        @self.app.route("/logpage")
+        def logpage():
+            handler = IndexBlueprint(self.loggerManager)
+            return handler.logpage()
         @self.app.route("/api/loadChat", methods=['POST'])
         def loadChat():
             reqJsonData = request.get_json()
@@ -111,3 +119,8 @@ class RouterManager:
                 }
             }
             return response_data
+
+        @self.app.route("/api/dirPathLog", methods=['GET'])
+        def dirPathLog():
+            handler = LogControlBlueprint(self.loggerManager)
+            return handler.getLogDir()

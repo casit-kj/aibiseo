@@ -5,18 +5,17 @@ module.create.date: 2024. 02. 21
 module.writer: Haengun Oh
 module.writer.email: jamesohe@gmail.com
 """
+import os
 
 from flask import Blueprint, request, jsonify, Flask, render_template, session
 from libs.mods.mnglogger import LoggingManager
 from libs.mods.dbsource import DBSource
 
 
-class ChatListBlueprint:
-    def __init__(self, loggerManager, dbServer):  
+class LogControlBlueprint:
+    def __init__(self, loggerManager):
         self.loggerManager = loggerManager
-        self.dbServer = dbServer
         
-    def chatList(self):
-        message, code = self.dbServer.chatlist()
-        return jsonify({'result_Data': message,'status':code,'loginconfirm': session.get('logged_in')})
-   
+    def getLogDir(self):
+        message, code = self.loggerManager.get_log_dir()
+        return jsonify({'result_Data': message, 'status': code, 'loginconfirm': session.get('logged_in')})

@@ -12,7 +12,10 @@ import os
 import time
 from datetime import datetime
 
-class LoggingManager:   
+from flask import jsonify, session
+
+
+class LoggingManager:
      
     log_dir = None
     loggerApp = None
@@ -81,4 +84,29 @@ class LoggingManager:
         LoggingManager.loggerError.info(message)      
         
     def printModelLogger(self, message):
-        LoggingManager.loggerModel.info(message)                       
+        LoggingManager.loggerModel.info(message)
+
+    @classmethod
+    def get_log_dir(cls):
+        log_directory = cls.log_dir
+
+        files = []  # 파일들을 저장할 빈 리스트 생성
+
+        directory_path = log_directory
+        for item in os.listdir(directory_path):
+            # 전체 경로로 변환
+            full_path = os.path.join(directory_path, item)
+            # 항목이 파일이면 출력
+            if os.path.isfile(full_path):
+                files.append(item)
+        try:
+            if session.get('logged_in'):
+                return ({"result": {
+                    "status": True, "code": "200", "answer": files}}), True
+            else:
+                return ({"result": {
+                    "status": False, "code": "201", "answer": "Login Please"}}), False
+
+        except Exception as e:
+            return ({"result": {
+                "status": False, "code": "501", "answer": str(e)}}), False

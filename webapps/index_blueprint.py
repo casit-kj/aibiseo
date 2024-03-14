@@ -18,3 +18,6 @@ class IndexBlueprint:
 
     def usermanage(self):
         return render_template('usermanage.html')
+
+    def logpage(self):
+        return render_template('log.html')

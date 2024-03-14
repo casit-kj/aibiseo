@@ -14,7 +14,7 @@ function headMenuBar() {
     const headMenuUl = $('#head-menubar');
     const menuList = [{'url': '/', 'name': 'Home'},
             {'url': '/usermanage', 'name': 'User'},
-            {'url': '/', 'name': 'Log'},
+            {'url': '/logpage', 'name': 'Log'},
             {'url': '/', 'name': 'addmenu1'},
             {'url': '/', 'name': 'addmenu2'}]
     console.log(menuList);
@@ -1116,4 +1116,55 @@ async function targetUserDelete(uName){
     } catch (error) {
         console.log(error);
     }
+}
+
+async function dirPathLog(){
+    const loginConversations = $('#login-conversations');
+    const logoutConversations = $('#logout-conversations');
+    const clearConversations = $('#clear-conversations');
+    const userConfig  = $('#userConfig');
+    try {
+        const response = await $.ajax({
+            url: "/api/dirPathLog",
+            type: "GET"
+        });
+        console.log(response);
+        if(response["status"]) {
+            const dataSet = response["result_Data"]["result"]["answer"];
+            const loginConfirm = response['loginconfirm'];
+            if (loginConfirm){
+                loginConversations.css("display", "none");
+                logoutConversations.css("display", "block");
+                clearConversations.css("display", "block");
+                userConfig.css("display", "block");
+                await logListup(dataSet);
+            } else {
+                logoutConversations.css("display", "none");
+                loginConversations.css("display", "block");
+                clearConversations.css("display", "none");
+                userConfig.css("display", "none");
+            }
+        } else {
+            console.log(response["result_Data"]);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function logListup(dataSet){
+    const addLog = $('#add_log');
+    addLog.empty();
+    dataSet.forEach(function (data) {
+        let LogTitle = data;
+        // Date 객체 생성
+        let divConvo = $("<div></div>").addClass("convo");
+        let divLeft = $("<div></div>").addClass("left");
+        let iIcon = $("<i></i>").addClass("fa-regular fa-comments");
+        let spanConvoTitle = $("<span></span>").addClass("convo-title")
+            .text(LogTitle);
+        divLeft.append(iIcon,spanConvoTitle);
+        divConvo.append(divLeft);
+        addLog.append(divConvo);
+    });
 }
