@@ -42,12 +42,7 @@
 </form>
 <div class="menu" >
     <nav class="clearfix">
-        <ul class="clearfix">
-            <li><a href="/">Home</a></li> <!--""<-여기 부분에 URL 작성하면 됨-->
-            <li><a href="/usermanage">User</a></li>
-            <li><a href="http://www._____.com/Project">Project</a></li>
-            <li><a href="http://www._____.com/Travel">Travel</a></li>
-            <li><a href="http://www._____.com/Contact">Contact</a></li>
+        <ul class="clearfix" id="head-menubar">
         </ul>
         <a id="pull" href="#"></a>
     </nav>
@@ -213,6 +208,7 @@
 </html>
 <script>
     $(document).ready(function() {
+        headMenuBar()
         wellcomeBox()
         const sendText = document.getElementById('message-input');
 

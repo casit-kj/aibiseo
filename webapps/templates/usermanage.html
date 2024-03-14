@@ -25,12 +25,7 @@
     <input type="hidden" name="chat_create_at" id="create_at" value="" />
 <div class="menu" >
     <nav class="clearfix">
-        <ul class="clearfix">
-            <li><a href="/">Home</a></li> <!--""<-여기 부분에 URL 작성하면 됨-->
-            <li><a href="/usermanage">User</a></li>
-            <li><a href="http://www._____.com/Project">Project</a></li>
-            <li><a href="http://www._____.com/Travel">Travel</a></li>
-            <li><a href="http://www._____.com/Contact">Contact</a></li>
+        <ul class="clearfix" id="head-menubar">
         </ul>
         <a id="pull" href="#"></a>
     </nav>
@@ -78,20 +73,6 @@
         </div>
     </div>
 
-</div>
-<!-- 모달 창 -->
-<div id="modalwindow" class="modal">
-    <!-- 모달 컨텐츠 -->
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <p>검색결과</p>
-        <div class="box searchresults">
-            <div class="top">
-                <div class="resultbox">
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 <!-- 로그인 창 -->
 <div id="modallogin" class="modal">
@@ -165,6 +146,7 @@
 </html>
 <script>
     $(document).ready(function() {
+        headMenuBar()
         userTable();
         // 모달 열기
         $("#openModal").click(function() {

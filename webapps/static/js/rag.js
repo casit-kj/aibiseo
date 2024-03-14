@@ -8,6 +8,26 @@ const format = (text) => {
 };
 
 /**
+ * 상단 페이지 이동 메뉴바
+ */
+function headMenuBar() {
+    const headMenuUl = $('#head-menubar');
+    const menuList = [{'url': '/', 'name': 'Home'},
+            {'url': '/usermanage', 'name': 'User'},
+            {'url': '/', 'name': 'Log'},
+            {'url': '/', 'name': 'addmenu1'},
+            {'url': '/', 'name': 'addmenu2'}]
+    console.log(menuList);
+    menuList.forEach(function (data){
+        let liList = $("<li></li>");
+        let aList = $("<a></a>").attr('href',data['url'])
+            .text(data['name']);
+        liList.append(aList);
+        headMenuUl.append(liList);
+    })
+}
+
+/**
  * 질문입력창 크기 조절
  * @param textarea
  */
@@ -947,6 +967,10 @@ async function deleteUser(){
     }
 }
 
+/**
+ * 사용자테이블 데이터 호출
+ * @returns {Promise<void>}
+ */
 async function userTable(){
     const loginConversations = $('#login-conversations');
     const logoutConversations = $('#logout-conversations');
@@ -979,6 +1003,11 @@ async function userTable(){
     }
 }
 
+/**
+ * 사용자 테이블 출력
+ * @param dataSet
+ * @returns {Promise<void>}
+ */
 async function userTableBody(dataSet){
     const userTable = $('#user-table-body');
 

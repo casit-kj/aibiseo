@@ -33,7 +33,7 @@ def callApplicationDispatch(name, appLogger, appConfig):
     if dbServer.is_alive():
         dbServer.disconnection()
         llmServer = LLMServer(appLogger, json_configset)
-        #llmServer.load_model()
+        llmServer.load_model()
     
         daemon = WebServer(name, appLogger, dbServer, llmServer, json_configset, static_dir, templates_dir)
         daemon.run(appConfig.get_port())

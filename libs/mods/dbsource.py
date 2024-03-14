@@ -360,6 +360,11 @@ class DBSource:
             try:
                 cursor = conn.cursor()
                 if cursor:
+                    clearsql = "DELETE chat_dialog, chat_qna FROM chat_dialog LEFT JOIN chat_qna ON chat_dialog.chat_dialog_id = chat_qna.chat_dialog_id WHERE chat_dialog.chat_user_id = %s;"
+                    # 쿼리 실행
+                    cursor.execute(clearsql, userInfo['uName'])
+                    # 변경사항 저장
+                    conn.commit()
                     sql = "DELETE FROM chat_user WHERE chat_user_name =%s;"
                     # 쿼리 실행
                     cursor.execute(sql,userInfo['uName'])

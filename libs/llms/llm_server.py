@@ -20,6 +20,7 @@ class LLMServer:
         self.appBaseDir = self.configJsonData['basedir']
         self.modelDir = self.configJsonData['modeldir']
         self.selectModelName = self.configJsonData['select_model']
+        self.modelLists = self.configJsonData['model_lists']
         self.Tokenizer = None
         self.Model = None
         self.Pipe = None
@@ -39,14 +40,18 @@ class LLMServer:
     def load_model(self):        
         message = f"{self.selectModelName} 모델 로딩 중....."
         self.appLogger.printModelLogger(message)
-            
+        
+        modelObject = None
+                    
         if self.selectModelName == "casllm-base-7b-hf":
-            llama2Hf = Llama2HF(self.appLogger, self.modelDir, self.selectModelName, self.configJsonData['models'][self.selectModelName])
-            self.Model, self.Tokenizer, self.Pipe = llama2Hf.load()            
-        elif self.selectModelName == "KoAlpaca-Polyglot-12.8B":
-            koalpaca = KoAlpaca(self.appLogger, self.modelDir, self.selectModelName, self.configJsonData['models'][self.selectModelName])
-            self.Model, self.Tokenizer, self.Pipe = koalpaca.load()
-            
+            modelObject = Llama2HF(self.appLogger, self.modelDir, self.selectModelName)                       
+        elif self.selectModelName == "koalpaca-polyglot-12.8bhf-8bit":
+            modelObject = KoAlpaca(self.appLogger, self.modelDir, self.selectModelName)
+        
+        # 모델을 로딩한다.
+        if modelObject != None:
+            self.Model, self.Tokenizer, self.Pipe = modelObject.load() 
+                            
         if self.is_alive():   
             message = f"{self.selectModelName} 모델을 로딩이 되었습니다."
             self.appLogger.printModelLogger(message)

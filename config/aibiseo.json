@@ -1,8 +1,11 @@
 {
     "basedir": "/home/bwis/aibiseo",
     "modeldir": "/data/aibiseo/models/",
-    "select_model": "KoAlpaca-Polyglot-12.8B",
-
+    "select_model": "koalpaca-polyglot-12.8bhf-8bit",
+    "model_lists": [
+        "koalpaca-polyglot-12.8bhf-8bit",
+        "bllossom-llama2-13bhf-chat-4bit"
+    ],
     "datasource": {
         "url": "118.217.7.2",
         "port": 3306,
@@ -10,34 +13,5 @@
         "user": "bwis",
         "passwd": "cas#3815B",
         "charset": "utf8"
-    }, 
-    
-    "models": {
-        "casllm-base-7b-hf": {        
-            "encode": {
-                "return_tensors": "pt"
-            },
-            "decode": {
-                "skip_special_tokens": true
-            },                                          
-            "generate": {
-                "max_length": 2000,
-                "temperature": 0.7,
-                "num_return_sequences": 1   
-            }
-        },        
-        "KoAlpaca-Polyglot-12.8B": {
-            "encode": {
-                "return_tensors": "pt"
-            },
-            "decode": {
-                "skip_special_tokens": true
-            },                                          
-            "generate": {
-                "max_length": 2000,
-                "temperature": 0.7,
-                "num_return_sequences": 1   
-            }
-        }
     }
 }
