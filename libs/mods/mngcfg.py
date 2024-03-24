@@ -9,7 +9,7 @@ import os, json, argparse
 
 class ConfigManager:
     
-    config_filename = "aibiseo.json"                
+    config_filename = "system.json"                
     def __init__(self):
         self.app_config_file = None             
         parser = argparse.ArgumentParser(description='Process some data.')
