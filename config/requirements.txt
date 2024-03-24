@@ -1,8 +1,10 @@
-torch
 flask
-kerberos
-pymysql
 gevent
+pymysql
+aiohttp
+requests
+
+torch
 transformers
 sentencepiece
 fairscale

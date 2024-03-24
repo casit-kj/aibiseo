@@ -7,18 +7,17 @@ module.writer.email: jamesohe@gmail.com
 """
 
 from flask import Blueprint, request, jsonify, Flask, render_template, session
-import time
+import json, time
 from datetime import datetime
-import libs.mods.mhash as support_module
-from libs.mods.mnglogger import LoggingManager
-from libs.mods.dbsource import DBSource
-from libs.llms.system_prompt import composit_question
-from libs.llms.llm_server import LLMServer
+import libs.mhash as support_module
+from libs.mnglogger import LoggingManager
+from libs.prompter import prompter
+import requests
 
 class ConversitionBlueprint:
-    def __init__(self, loggerManager, dbServer, llmServer):  
+    def __init__(self, loggerManager, dbServer, modelConfig):  
         self.loggerManager = loggerManager
-        self.llmServer = llmServer
+        self.modelConfig = modelConfig
         self.dbServer = dbServer
             
     # 대화 함수(문장생성)        
@@ -26,18 +25,18 @@ class ConversitionBlueprint:
                       
         # 데이터를 확인한다.
         result, json_dataset = self.validate_request_data(reqJsonData)
+        
         if not result:
             return json_dataset
         
-        # GenAI에 요청 시간
-        assistant_start_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
-                
+               
         # 답변 요청
+        ''' LLM 서버에 답변을 요청하는 부분
+        '''
+        assistant_start_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
         response_answer = self.generation(json_dataset['question'], json_dataset['reference'], json_dataset['past_dialog'])
-        
-        # GenAI 답변 종료 시간
-        assistant_end_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+        assistant_end_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')        
+                
         json_dataset['answer'] = response_answer
         json_dataset['assistant_start_at'] = assistant_start_at
         json_dataset['assistant_end_at'] = assistant_end_at
@@ -87,19 +86,6 @@ class ConversitionBlueprint:
         # DB 에 저장하는 부분
         message, result = self.dbServer.insertDialog(put_data)
         return result, message
-            
-        
-    # GenAI 와의 대화
-    def generation(self, question, reference, past_dialog):        
-        preprompt = "대화준비" 
-        conversation = composit_question(preprompt, past_dialog, question, reference)            
-                                                                                    
-        if self.llmServer.is_alive():                            
-            answer = self.llmServer.generate(conversation)
-            return answer
-        else:
-            answer = self.llmServer.get_model_name() + " 모델이 로딩되지 않았습니다."
-            return answer
     
     # 입력변수 재처리 함수
     def validate_request_data(self, reqJsonData):
@@ -140,3 +126,49 @@ class ConversitionBlueprint:
         }
                 
         return True, jsonDataset
+    
+    
+        
+    # GenAI 와의 대화
+    # LLM 서버에 접속하여 데이터를 수신한다.
+    def generation(self, question, reference, past_dialog):        
+        preprompt = "대화준비" 
+        conversation = prompter(preprompt, past_dialog, question, reference)                                                     
+        endpoints = self.modelConfig['endpoints']
+        params = self.modelConfig['parameters']
+        url = endpoints['url'] + endpoints['func'];        
+        if self.check_server_status(endpoints['url']):
+            return self.ajax_llm_generation(url, conversation, params)                       
+        else:
+            return "LLM 서버 상태를 확인하십시요."
+        
+        
+                
+    # LLM Connection & Fetch data
+    def ajax_llm_generation(self, url, prompt, params):      
+        try:
+            headers = {
+                "Content-Type": "application/json"
+            }
+            json_data = {
+                "prompt": prompt,
+                "params": params
+            } 
+            data = json.dumps(json_data)
+            data = requests.post(url, headers=headers, data=data)
+            print(f"받은데이터: {data}")
+            return data
+        except requests.exceptions.RequestException as e: 
+            return f"요청 중 오류가 발생했습니다: {e}"        
+    
+    # LLM Server Check   
+    def check_server_status(self, url):
+        try:
+            response = requests.get(url + "/alive")
+            if response.status_code == 200:
+                return True
+            else:
+                return False            
+        except requests.exceptions.RequestException as e:
+            print(f"Error: {e}")
+            return False        

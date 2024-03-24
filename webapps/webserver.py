@@ -12,19 +12,18 @@ from gevent.pywsgi import WSGIServer
 from webapps.webroutes import RouterManager
 
 class WebServer:    
-    def __init__(self, name, loggerManager, dbServer, llmServer, configJsonData, flaskFolderStatic, flaskFoldertemplates,adminConfig):
+    def __init__(self, name, loggerManager, dbServer, configJsonData, flaskFolderStatic, flaskFoldertemplates, modelConfig, adminConfig):
               
         self.app = Flask(name, static_folder=flaskFolderStatic, static_url_path='/static', 
                          template_folder=flaskFoldertemplates)
         self.loggerManager = loggerManager
-        self.llmServer = llmServer
         self.dbServer = dbServer
         self.configJsonData = configJsonData
         self.app.config['SECRET_KEY'] = 'casit'
         self.app.permanent_session_lifetime = timedelta(minutes=30)
         self.adminConfig = adminConfig
         # Blueprint를 Flask 애플리케이션에 등록
-        router_manager = RouterManager(self.app, self.loggerManager, self.dbServer, self.llmServer, self.adminConfig)
+        router_manager = RouterManager(self.app, self.loggerManager, self.dbServer, modelConfig, self.adminConfig)
         self.set_logger()
 
         

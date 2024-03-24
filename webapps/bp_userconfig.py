@@ -6,8 +6,8 @@ module.create.date: 2024. 02. 21
 """
 
 from flask import Blueprint, request, jsonify, Flask, render_template, session
-from libs.mods.mnglogger import LoggingManager
-from libs.mods.dbsource import DBSource
+from libs.mnglogger import LoggingManager
+from libs.dbsource import DBSource
 
 
 class ChatUserConfigBlueprint:

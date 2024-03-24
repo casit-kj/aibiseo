@@ -4,9 +4,10 @@
 export FLASK_APP=aibiseo
 export FLASK_DEBUG=true
 
-SERVER_APP_NAME=aibiseo
 SERVER_PORT=5000
-SERVER_HOME=${HOME}/${SERVER_APP_NAME}
+SERVER_VENV=/data/pvenv/aibiseo
+SERVER_APP_NAME=aibiseo
+SERVER_HOME=${HOME}/aibiseo
 SERVER_LOG_DIR=${SERVER_HOME}/logs
 SERVER_CONFIG_DIR=${SERVER_HOME}/config
 SERVER_START_FILE=starter.py
@@ -15,13 +16,22 @@ SERVER_CONSOLE_LOG=${SERVER_LOG_DIR}/server_$(date +"%Y-%m-%d_%H").log
 function start()
 {
    if lsof -i :$SERVER_PORT &>/dev/null; then
-      echo "Server start is aborted because port $SERVER_PORT is in use."
+      echo "AI Biseo Server start is aborted because port $SERVER_PORT is in use."
    else
-      echo "Starting the BrainBiseo on port $SERVER_PORT ..."
+      echo "Starting the AI Biseo S on port $SERVER_PORT ..."
+      source ${SERVER_VENV}/bin/activate
+      check      
       nohup python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} >> ${SERVER_CONSOLE_LOG} 2>&1 &
       #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR} 2>&1 &
       #python ${SERVER_HOME}/${SERVER_START_FILE} --basedir=${SERVER_HOME} --logdir=${SERVER_LOG_DIR} --port=${SERVER_PORT} --cfgdir=${SERVER_CONFIG_DIR}
    fi
+}
+
+function check()
+{
+    if [[ ! -d "$SERVER_LOG_DIR" ]]; then
+        mkdir -p "$SERVER_LOG_DIR"
+    fi    
 }
 
 function status() 
@@ -50,7 +60,7 @@ function stop()
    else
      echo "No process is using port $SERVER_PORT"	   
    fi
-     echo "BrainBiseo stopping ... PID : $target_pid"
+     echo "AO Biseo stopping ... PID : $target_pid"
 }
 
 

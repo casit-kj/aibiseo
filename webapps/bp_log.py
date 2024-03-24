@@ -8,8 +8,8 @@ module.writer.email: jamesohe@gmail.com
 import os
 
 from flask import Blueprint, request, jsonify, Flask, render_template, session
-from libs.mods.mnglogger import LoggingManager
-from libs.mods.dbsource import DBSource
+from libs.mnglogger import LoggingManager
+from libs.dbsource import DBSource
 
 
 class LogControlBlueprint:

@@ -3,13 +3,23 @@
         "id": "casit"
     },
     "basedir": "/home/bwis/aibiseo",
-    "modeldir": "/data/aibiseo/models/",
-    "select_model": "koalpaca-polyglot-12.8bhf-8bit",
-    "model_lists": 
+    "datasource": {
+        "url": "118.217.7.2",
+        "port": 3306,
+        "dbname": "chatbot",
+        "user": "bwis",
+        "passwd": "cas#3815B",
+        "charset": "utf8"
+    },
+    "model": "koalpaca-polyglot-12.8bhf-8bit", 
+    "modelConfigs":
         [{
             "name": "koalpaca-polyglot-12.8bhf-8bit",
             "description": "Koalpaca-ploygloat 12.8B Qutanzation 8Bit Model",
-            "endpoints":[{"url": "http://127.0.0.1:4000"}],
+            "endpoints": {
+                "url": "http://114.110.135.187:4000",
+                "func": "/chat"
+            },
             "userMessageToken": "<|prompter|>",
             "assistantMessageToken": "<|assistant|>",
             "messageEndToken": "</s>",
@@ -27,7 +37,7 @@
         }, {
             "name": "bllossom-llama2-13bhf-chat-4bit",
             "description": "Koalpaca-ploygloat 12.8B Qutanzation 8Bit Model",
-            "endpoints":[{"url": "http://127.0.0.1:4000"}],
+            "endpoints":[{"url": "http://114.110.135.187:4000"}],
             "userMessageToken": "<|prompter|>",
             "assistantMessageToken": "<|assistant|>",
             "messageEndToken": "</s>",
@@ -41,13 +51,5 @@
                 "max_new_tokens": 1024
 
             }            
-        }],
-    "datasource": {
-        "url": "118.217.7.2",
-        "port": 3306,
-        "dbname": "chatbot",
-        "user": "bwis",
-        "passwd": "cas#3815B",
-        "charset": "utf8"
-    }
+        }]    
 }

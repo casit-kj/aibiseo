@@ -11,15 +11,15 @@ from uuid import uuid1
 from flask import Flask, render_template, jsonify, request, session
 from werkzeug.utils import secure_filename
 
-from libs.mods import mnglogger
-from libs.mods.mnglogger import LoggingManager
+from libs import mnglogger
+from libs.mnglogger import LoggingManager
 from webapps.bp_chroma import ChromadbBlueprint
 from webapps.bp_delete_chat_dialog import DeleteChatDialogBlueprint
 from webapps.bp_index import IndexBlueprint
 from webapps.bp_load_chat import LoadChatBlueprint
 from webapps.bp_clear_conversations import ClearConversationsBlueprint
+from webapps.bp_conversations import ConversitionBlueprint
 from webapps.bp_chat_list import ChatListBlueprint
-from webapps.bp_conversition import ConversitionBlueprint
 from webapps.bp_log import LogControlBlueprint
 from webapps.bp_logpage import LogpageBlueprint
 from webapps.bp_upload import UploadBlueprint
@@ -32,12 +32,12 @@ from webapps.bp_usermanage import UsermanageBlueprint
 
 
 class RouterManager:
-    def __init__(self, app, loggerManager, dbServer, llmServer, adminConfig):
+    def __init__(self, app, loggerManager, dbServer, modelConfig, adminConfig):
         self.app = app
         self.loggerManager = loggerManager
         self.dbServer = dbServer
-        self.llmServer = llmServer
         self.register_routes()
+        self.modelConfig = modelConfig
         self.adminConfig = adminConfig
 
     def register_routes(self):
@@ -146,8 +146,7 @@ class RouterManager:
 
         @self.app.route("/api/chat", methods=["POST"])
         @cross_origin(origin="*", headers=['Content- Type', 'Authorization'])
-        def conversition():
-            # Validate dataType                      
+        def conversition():                
             if request.content_type != 'application/json':
                 response_data = {
                     "status": "405",
@@ -158,7 +157,7 @@ class RouterManager:
                 return response_data
 
             reqJsonData = request.get_json()
-            handler = ConversitionBlueprint(self.loggerManager, self.dbServer, self.llmServer)
+            handler = ConversitionBlueprint(self.loggerManager, self.dbServer, self.modelConfig)
             return handler.conversition(reqJsonData)
 
         @self.app.route("/api/logout", methods=['GET'])

@@ -9,7 +9,7 @@ import os, json, argparse
 
 class ConfigManager:
     
-    config_filename = "system.json"                
+    config_filename = "configs.json"                
     def __init__(self):
         self.app_config_file = None             
         parser = argparse.ArgumentParser(description='Process some data.')
@@ -50,6 +50,13 @@ class ConfigManager:
     
     def get_cfgfile(self):
         return self.app_config_file
+    
+    def get_modelConfigs(self, configs, model_name):       
+        model_list = configs.get('modelConfigs', [])
+        for model in model_list:
+            if model.get('name') == model_name:
+                return model
+        return None      
     
     def exist_app_config_file(self):
         if self.app_config_file is not None:

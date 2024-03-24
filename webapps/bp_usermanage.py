@@ -7,7 +7,7 @@ module.writer.email: jamesohe@gmail.com
 """
 
 from flask import Blueprint, request, jsonify, Flask, render_template
-from libs.mods.mnglogger import LoggingManager
+from libs.mnglogger import LoggingManager
 import chromadb
 class UsermanageBlueprint:
     def __init__(self, loggerManager):  

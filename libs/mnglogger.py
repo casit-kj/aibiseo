@@ -26,11 +26,10 @@ class LoggingManager:
         LoggingManager.log_dir = log_dir
         LoggingManager.loggerApp = self.create_logger('app_logger', 'webserver-app.log')
         LoggingManager.loggerError = self.create_logger('error_logger', 'webserver-error.log')
-        LoggingManager.loggerModel = self.create_logger('model_logger', 'llm-model.log')
     
     # 로거가 정상적으로 생성되었는지 확인한다.
     def preparedLogger(self):
-        return all([LoggingManager.loggerApp, LoggingManager.loggerError, LoggingManager.loggerModel])
+        return all([LoggingManager.loggerApp, LoggingManager.loggerError])
 
     # 로거 공통 생성
     def create_logger(self, logger_name, file_name):        
@@ -59,9 +58,6 @@ class LoggingManager:
     def getErrorLogger(self):
         return LoggingManager.loggerError
     
-    def getModelLogger(self):
-        return LoggingManager.loggerModel
-    
     @staticmethod 
     def StartWebserver():
         LoggingManager.loggerApp.info('')
@@ -82,16 +78,12 @@ class LoggingManager:
         
     def printErrorLogger(self, message):
         LoggingManager.loggerError.info(message)      
-        
-    def printModelLogger(self, message):
-        LoggingManager.loggerModel.info(message)
 
     @classmethod
-    def get_log_dir(cls,adminConfig):
+    def get_log_dir(cls, adminConfig):
         log_directory = cls.log_dir
-
         files = []  # 파일들을 저장할 빈 리스트 생성
-
+        
         directory_path = log_directory
         for item in os.listdir(directory_path):
             # 전체 경로로 변환
