@@ -1,8 +1,0 @@
-torch
-fairscale
-fire
-sentencepiece
-transformers
-protobuf
-accelerate
-

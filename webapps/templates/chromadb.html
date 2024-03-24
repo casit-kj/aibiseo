@@ -24,7 +24,7 @@
     <input type="hidden" name="chat_dialog_id" id="dialog_id" value="" />
     <input type="hidden" name="chat_create_at" id="create_at" value="" />
 <div class="menu" >
-    <nav class="clearfix">
+    <nav class="clearfix" id="navHead">
         <ul class="clearfix" id="head-menubar">
         </ul>
         <a id="pull" href="#"></a>
@@ -50,7 +50,7 @@
     </div>
 
     <div class="conversation disable-scrollbars">
-        <form id="uploadForm" enctype="multipart/form-data">
+        <form id="chromaForm" enctype="multipart/form-data">
             <div class="box" style="height: 85vh; display: flex; flex-direction: column;">
                 <div class="upload-box">
                     <div class="upload-box-group">
@@ -63,26 +63,22 @@
                             <input type="text" name="file-writer" class="form-control" id="file-writer">
                         </div>
                     </div>
-                    <div class="upload-box-group">
-                        <label for="file-section" class="label-control">문서분류</label>
-                        <div class="col-box">
-                            <input type="text" name="file-section" class="form-control" id="file-section">
-                        </div>
-                        <label for="file-date" class="label-control">문서생성일</label>
-                        <div class="col-box">
-                            <input type="datetime-local" name="file-date" class="form-control" id="file-date">
-                        </div>
-                    </div>
                     <div class="ln_solid"></div>
                     <div class="upload-box-group">
-                        <label for="file-upload" class="label-control">파일업로드</label>
+                        <label for="file-upload" class="label-control">문서내용</label>
                         <div class="col-box" style="width: 60%;">
-                            <input type="file" name="file-upload" class="form-control" id="file-upload">
+                            <input type="file" name="file-content" class="form-control" id="file-content">
                         </div>
-                        <div class="bottom_buttons" id="uploadButton" style="width: 12%">
-                            <button onclick="fileUpload()" style="background-color: #16101b66;">
+                        <div class="bottom_buttons" id="chromaButton" style="width: 12%">
+                            <button onclick="chromaInsert()" style="background-color: #16101b66;">
                                 <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
-                                <span>업로드</span>
+                                <span>크로마</span>
+                            </button>
+                        </div>
+                        <div class="bottom_buttons" id="chromaButton" style="width: 14%">
+                            <button onclick="chromaQuery()" style="background-color: #16101b66;">
+                                <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
+                                <span>크로마쿼리</span>
                             </button>
                         </div>
                     </div>
@@ -103,7 +99,7 @@
 
                 <input type="password" id="upsw" class="loginPw" placeholder="비밀번호 입력" required>
 
-                <button class="loginBtn" onclick="loginUser('upload')">로그인</button>
+                <button class="loginBtn" id="loginButton" onclick="loginUser('upload')">로그인</button>
 
                 <button class="loginBtn" onclick="registerModal()" style="margin-right: 5px; background-color: #272626">회원가입</button>
             </div>
@@ -163,7 +159,16 @@
 </html>
 <script>
     $(document).ready(function() {
+        const loginButton = document.getElementById('upsw');
+        loginButton.addEventListener('keydown', function (event) {
+            // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
+            if (event.key === 'Enter') {
+                event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
+                loginUser('upload'); // 검색 버튼 클릭 실행
+            }
+        });
         headMenuBar();
+        upLoadPage();
         // 모달 열기
         $("#openModal").click(function() {
             $("#modalwindow").css("display", "block");

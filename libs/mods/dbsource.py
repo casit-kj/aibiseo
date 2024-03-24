@@ -323,7 +323,7 @@ class DBSource:
 
 
 
-    def userTableList(self):
+    def userTableList(self,adminConfig):
         conn = self.connection()
         if (not self.is_alive()):
             return False
@@ -337,12 +337,14 @@ class DBSource:
 
                     # 변경사항 저장
                     conn.commit()
-                    if session.get('logged_in'):
+                    if session.get('uname') == adminConfig:
                         result = cursor.fetchall()
+                        return ({"result": {
+                            "status": True, "code": "200", "answer": result}}), True
                     else:
                         result = ''
-                    return ({"result":{
-                            "status": True, "code": "200", "answer": result}}), True
+                        return ({"result": {
+                            "status": False, "code": "201", "answer": result}}), True
                 else:
                     return ({"result": {
                         "status": False, "code": "201", "answer": "load userData Failed"}}), False

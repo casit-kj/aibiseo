@@ -19,6 +19,7 @@ body {
     display: flex;
     gap: var(--section-gap);
     height: 100%;
+    /*overflow: auto;*/
 }
 
 .disable-scrollbars {
@@ -62,6 +63,7 @@ body {
     overflow-y: inherit;
     overflow-x: hidden;
     padding-bottom: 50px;
+    padding-top: 20px;
 }
 
 .conversation .user-input {
@@ -215,6 +217,7 @@ body {
     max-width: 48px;
     max-height: 48px;
     flex-shrink: 0;
+    user-select: none;
 }
 
 .message .user img {
@@ -281,25 +284,29 @@ body {
     border-style: solid;
 }
 
-@keyframes spinner {
-    to {
-        transform: rotate(360deg);
-    }
+.spinner {
+    display: none;
+    border: 7px solid rgba(0, 0, 0, 0.1);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border-left-color: #09f;
+    animation: spin 1s ease-in-out infinite;
+
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000000;
 }
 
-.spinner:before {
-    content: '';
-    box-sizing: border-box;
-    position: absolute;
-    top: 50%;
-    left: 45%;
-    width: 20px;
-    height: 20px;
-
-    border-radius: 50%;
-    border: 1px solid #74b4ec;
-    border-top-color: white;
-    animation: spinner .6s linear infinite;
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .bottom_buttons {
@@ -313,6 +320,28 @@ body {
     padding: 8px 12px;
     display: flex;
     gap: 18px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+    border: 1px solid #74b4ec;
+    border-radius: var(--border-radius-1);
+    width: 100%;
+}
+.bottom_buttons select {
+    color: #74b4ec;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #74b4ec;
+    border-radius: var(--border-radius-1);
+    width: 100%;
+}
+.bottom_buttons select option {
+    padding: 8px 12px;
+    display: flex;
     align-items: center;
     cursor: pointer;
     user-select: none;
@@ -603,7 +632,6 @@ nav a#pull{
 }
 html {
     -webkit-touch-callout:none;
-    -webkit-user-select:none;
     -webkit-tap-highlight-color:rgba(0, 0, 0, 0);
 }
 
@@ -695,4 +723,121 @@ li a:hover{
 .user-delete{
     background-color: rgba(139, 0, 0, 0.53);
     margin-left: 5px;
+}
+
+/**
+로그파일 출력
+ */
+#logfilePrintBox{
+    flex-grow: 1;
+    padding: 12px;
+    width: 100%; /* 또는 원하는 % 또는 px로 설정 */
+    height: 100%;
+    overflow: auto;
+    white-space: pre-wrap; /* 공백과 줄바꿈 보존 */
+}
+
+
+
+/* 드롭다운 버튼 스타일 */
+.dropbtn {
+    background-color: transparent;
+    font-size: 16px;
+    padding: 8px 12px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    color: #74b4ec;
+    width: 100%;
+    border: none; /* 테두리 제거 */
+}
+
+/* 드롭다운 내용을 담는 컨테이너 */
+.dropdown {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: inline-block;
+}
+
+/* 드롭다운 항목 스타일 */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #2B2F40;
+    min-width: 160px;
+    /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+    z-index: 1;
+}
+
+/* 링크 스타일 */
+.dropdown-content span {
+    color: #74b4ec;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
+
+/* 마우스 호버 시 링크 스타일 */
+.dropdown-content a:hover {background-color: #84719040;}
+
+
+.show {
+    display: block;
+}
+
+.logfile-name{
+    font-size: 20px;
+    font-weight: bold;
+    padding: 12px;
+}
+
+.upload-box{
+    padding: 30px;
+}
+
+.upload-box-group{
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 10px;
+    display: table;
+    content: " ";
+    width: 100%;
+}
+
+.form-control{
+    display: block;
+    height: 34px;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 5px;
+    width: 90%;
+}
+.label-control{
+    width: 10%;
+    position: relative;
+    float: left;
+    margin: 5px;
+    padding: 6px 12px;
+}
+
+.ln_solid {
+    border-top: 1px solid #e5e5e5;
+    color: #ffffff;
+    background-color: #ffffff;
+    height: 1px;
+    margin: 20px 0
+}
+.col-box{
+    position: relative;
+    width: 33%;
+    float: left;
 }

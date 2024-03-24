@@ -1,11 +1,47 @@
 {
+    "admin": {
+        "id": "casit"
+    },
     "basedir": "/home/bwis/aibiseo",
     "modeldir": "/data/aibiseo/models/",
     "select_model": "koalpaca-polyglot-12.8bhf-8bit",
-    "model_lists": [
-        "koalpaca-polyglot-12.8bhf-8bit",
-        "bllossom-llama2-13bhf-chat-4bit"
-    ],
+    "model_lists": 
+        [{
+            "name": "koalpaca-polyglot-12.8bhf-8bit",
+            "description": "Koalpaca-ploygloat 12.8B Qutanzation 8Bit Model",
+            "endpoints":[{"url": "http://127.0.0.1:4000"}],
+            "userMessageToken": "<|prompter|>",
+            "assistantMessageToken": "<|assistant|>",
+            "messageEndToken": "</s>",
+            "preprompt": "Below are a series of .....",
+            "parameters": {
+                "temperature": 0.9,
+                "top_p": 0.95,
+                "repetition_penalty": 1.2,
+                "top_k": 50,
+                "truncate": 1000,
+                "max_new_tokens": 1024
+
+            }
+
+        }, {
+            "name": "bllossom-llama2-13bhf-chat-4bit",
+            "description": "Koalpaca-ploygloat 12.8B Qutanzation 8Bit Model",
+            "endpoints":[{"url": "http://127.0.0.1:4000"}],
+            "userMessageToken": "<|prompter|>",
+            "assistantMessageToken": "<|assistant|>",
+            "messageEndToken": "</s>",
+            "preprompt": "Below are a series of .....",
+            "parameters": {
+                "temperature": 0.9,
+                "top_p": 0.95,
+                "repetition_penalty": 1.2,
+                "top_k": 50,
+                "truncate": 1000,
+                "max_new_tokens": 1024
+
+            }            
+        }],
     "datasource": {
         "url": "118.217.7.2",
         "port": 3306,

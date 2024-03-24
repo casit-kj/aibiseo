@@ -9,7 +9,7 @@
     <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-    <title>ChatGPT 예제</title>
+    <title>Alpha Brain</title>
     <script src="/static/js/rag.js"></script>
     <script src="/static/js/icons.js"></script>
 
@@ -41,7 +41,7 @@
     <input type="hidden" name="bw_BN" value="true" />
 </form>
 <div class="menu" >
-    <nav class="clearfix">
+    <nav class="clearfix" id="navHead">
         <ul class="clearfix" id="head-menubar">
         </ul>
         <a id="pull" href="#"></a>
@@ -73,7 +73,6 @@
                 <span>New Conversation</span>
             </button>
             <div id="add_convo">
-            <div class="spinner"></div>
             </div>
         </div>
         <div class="bottom_buttons" id="clear-conversations">
@@ -95,22 +94,30 @@
     </div>
 
     <div class="conversation disable-scrollbars">
-        <div class="stop_generating stop_generating-hidden">
-            <button id="cancelButton">
-                <span>  검색중  </span>
-            </button>
+        <div class="dropdown">
+          <button id="modelSelectButton" class="dropbtn" onclick="">모델을 선택해주세요</button>
+          <div class="dropdown-content" id="dropdownMenu">
+            <span onclick="modelSelect('Koalpaca')">Koalpaca</span>
+            <span onclick="modelSelect('llama2hf')">llama2hf</span>
+            <span onclick="modelSelect('llm_server')">llm_server</span>
+          </div>
         </div>
+        <div class="spinner"></div>
+{#        <div class="stop_generating">#}
+{#            <button id="cancelButton">#}
+{#                <span>  검색중  </span>#}
+{#            </button>#}
+{#        </div>#}
         <div class="box" id="messages">
             <div class="start-Page">
 
             </div>
-<!--            <div class="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"></div>-->
         </div>
         <div class="user-input">
             <div class="box input-box">
                 <input type="checkbox" id ="toggle-slider">
                 <label for="toggle-slider" class="toggle-label"></label>
-                <textarea id="message-input" placeholder="토글이 활성화 되면 질문에 검색자료를 첨부합니다." cols="30" rows="4" style="white-space: pre-wrap; resize: none;" oninput="resizeTextarea(this)"></textarea>
+                <textarea id="message-input" placeholder="토글이 활성화 되면 질문에 검색자료를 첨부합니다." cols="30" rows="4" style="white-space: pre-wrap; resize: none;"></textarea>
                 <button  class="buttons" id="send-button" onclick="askGenAI()" disabled>
                     입력
                 </button>
@@ -147,7 +154,7 @@
 
                 <input type="password" id="upsw" class="loginPw" placeholder="비밀번호 입력" required>
 
-                <button class="loginBtn" onclick="loginUser('index')">로그인</button>
+                <button class="loginBtn" id="loginButton" onclick="loginUser('index')">로그인</button>
 
                 <button class="loginBtn" onclick="registerModal()" style="margin-right: 5px; background-color: #272626">회원가입</button>
             </div>
@@ -219,8 +226,14 @@
                 askGenAI(); // 검색 버튼 클릭 실행
             }
             // 쉬프트+엔터의 경우 기본 동작(줄바꿈) 실행됨
-
-
+        });
+        const loginButton = document.getElementById('upsw');
+        loginButton.addEventListener('keydown', function (event) {
+            // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
+            if (event.key === 'Enter') {
+                event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
+                loginUser('index'); // 검색 버튼 클릭 실행
+            }
         });
         chatList();
 
@@ -247,10 +260,24 @@
                 $('#send-button').prop('disabled', true);
             }
         });
+
+        $(".dropbtn").click(function(){
+            $("#dropdownMenu").toggle();
+        });
+
+        $(window).click(function(e){
+            if (!e.target.matches('.dropbtn')) {
+            var dropdown = $("#dropdownMenu");
+            if (dropdown.is(":visible")) {
+            dropdown.hide();
+            }
+        }
+        });
     })
+
     // 모든 모달과 모달 헤더를 선택합니다.
     let modals = document.querySelectorAll('.modal');
-    let headers = document.querySelectorAll('.modal-content p');
+    let headers = document.querySelectorAll('.modal-content > p');
 
     // 모달과 해당 헤더에 대해 드래그 기능을 설정하는 함수
     function setDraggable(modal, header) {

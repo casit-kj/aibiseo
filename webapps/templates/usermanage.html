@@ -9,7 +9,7 @@
     <!-- jQuery CDN -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
-    <title>ChatGPT 예제</title>
+    <title>Alpha Brain</title>
     <script src="/static/js/rag.js"></script>
     <script src="/static/js/icons.js"></script>
 
@@ -24,7 +24,7 @@
     <input type="hidden" name="chat_dialog_id" id="dialog_id" value="" />
     <input type="hidden" name="chat_create_at" id="create_at" value="" />
 <div class="menu" >
-    <nav class="clearfix">
+    <nav class="clearfix" id="navHead">
         <ul class="clearfix" id="head-menubar">
         </ul>
         <a id="pull" href="#"></a>
@@ -86,7 +86,7 @@
 
                 <input type="password" id="upsw" class="loginPw" placeholder="비밀번호 입력" required>
 
-                <button class="loginBtn" onclick="loginUser('usermanage')">로그인</button>
+                <button class="loginBtn" id="loginButton" onclick="loginUser('usermanage')">로그인</button>
 
                 <button class="loginBtn" onclick="registerModal()" style="margin-right: 5px; background-color: #272626">회원가입</button>
             </div>
@@ -146,6 +146,14 @@
 </html>
 <script>
     $(document).ready(function() {
+        const loginButton = document.getElementById('upsw');
+        loginButton.addEventListener('keydown', function (event) {
+            // 엔터키가 눌렸지만 쉬프트키는 눌리지 않았을 때
+            if (event.key === 'Enter') {
+                event.preventDefault(); // 기본 엔터키 동작(줄바꿈) 방지
+                loginUser('usermanage'); // 검색 버튼 클릭 실행
+            }
+        });
         headMenuBar();
         userTable();
         // 모달 열기

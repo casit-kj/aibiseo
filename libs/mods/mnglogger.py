@@ -87,7 +87,7 @@ class LoggingManager:
         LoggingManager.loggerModel.info(message)
 
     @classmethod
-    def get_log_dir(cls):
+    def get_log_dir(cls,adminConfig):
         log_directory = cls.log_dir
 
         files = []  # 파일들을 저장할 빈 리스트 생성
@@ -101,12 +101,34 @@ class LoggingManager:
                 files.append(item)
         try:
             if session.get('logged_in'):
-                return ({"result": {
-                    "status": True, "code": "200", "answer": files}}), True
+                if session.get('uname') == adminConfig:
+                    return ({"result": {
+                        "status": True, "code": "200", "answer": files}}), True
+                else:
+                    result = ''
+                    return ({"result": {
+                        "status": False, "code": "201", "answer": result}}), True
             else:
                 return ({"result": {
-                    "status": False, "code": "201", "answer": "Login Please"}}), False
+                    "status": True, "code": "201", "answer": "Login Please"}}), False
 
+        except Exception as e:
+            return ({"result": {
+                "status": False, "code": "501", "answer": str(e)}}), False
+
+    @classmethod
+    def loadLogFile(cls,reqJsonData):
+        log_directory = cls.log_dir
+
+        # 로그 파일의 경로를 지정합니다.
+        log_file_path = log_directory+'/'+reqJsonData['fileName']
+
+        # 파일을 열고 내용을 읽습니다.
+        with open(log_file_path, 'r') as file:
+            log_contents = file.read()  # 파일 전체를 한 번에 읽기
+        try:
+            return ({"result": {
+                "status": True, "code": "200", "answer": log_contents}}), True
         except Exception as e:
             return ({"result": {
                 "status": False, "code": "501", "answer": str(e)}}), False

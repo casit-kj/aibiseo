@@ -9,9 +9,10 @@ module.writer.email: jamesohe@gmail.com
 from flask import Blueprint, request, jsonify, Flask, render_template
 from libs.mods.mnglogger import LoggingManager
 import chromadb
-class UsermanageBlueprint:
+class UploadBlueprint:
     def __init__(self, loggerManager):  
         self.loggerManager = loggerManager
         
-    def usermanage(self):
-        return render_template('usermanage.html')
+
+    def upload(self):
+        return render_template('upload.html')

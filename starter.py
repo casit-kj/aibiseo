@@ -29,13 +29,13 @@ def callApplicationDispatch(name, appLogger, appConfig):
     json_configset = appConfig.get_config_json()
     dbServer = DBSource(json_configset['datasource'])
     dbServer.connection()
-          
+    adminConfig  = json_configset['admin']
     if dbServer.is_alive():
         dbServer.disconnection()
         llmServer = LLMServer(appLogger, json_configset)
-        # llmServer.load_model()
+        llmServer.load_model()
     
-        daemon = WebServer(name, appLogger, dbServer, llmServer, json_configset, static_dir, templates_dir)
+        daemon = WebServer(name, appLogger, dbServer, llmServer, json_configset, static_dir, templates_dir,adminConfig['id'] )
         daemon.run(appConfig.get_port())
     else:
         appLogger.printAppLogger("데이터베이스 연결에 문제가 있어 종료합니다.")
