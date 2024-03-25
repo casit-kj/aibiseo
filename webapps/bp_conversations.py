@@ -27,14 +27,12 @@ class ConversitionBlueprint:
         result, json_dataset = self.validate_request_data(reqJsonData)
         
         if not result:
-            return json_dataset
-        
-               
+            return json_dataset               
         # 답변 요청
         ''' LLM 서버에 답변을 요청하는 부분
         '''
         assistant_start_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  
-        response_answer = self.generation(json_dataset['question'], json_dataset['reference'], json_dataset['past_dialog'])
+        gen_result, response_answer = self.generation(json_dataset['question'], json_dataset['reference'], json_dataset['past_dialog'])
         assistant_end_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')        
                 
         json_dataset['answer'] = response_answer
@@ -42,10 +40,8 @@ class ConversitionBlueprint:
         json_dataset['assistant_end_at'] = assistant_end_at
 
         # 결과를 데이터베이스에 저장한다.
-        result, db_write_response = self.write_database(json_dataset)
-        if not result:
-           return db_write_response
-        
+        result, db_write_response = self.write_database(json_dataset, gen_result=True)
+       
         # 반환 Dataset 을 생성한다.                    
         resultData = {
             "result": {
@@ -66,7 +62,7 @@ class ConversitionBlueprint:
         return resultData
     
     # 데이터베이스에 저장
-    def write_database(self, dataset):
+    def write_database(self, dataset, gen_result=True):
         if session.get('logged_in'):
             chatuserid = session.get('uname')
         else:
@@ -83,8 +79,11 @@ class ConversitionBlueprint:
                 "chat_user_id": chatuserid
 
             }
-        # DB 에 저장하는 부분
-        message, result = self.dbServer.insertDialog(put_data)
+        if gen_result:
+            message, result = self.dbServer.insertDialog(put_data)
+        else:
+            message = "모델이 로딩되지 않았습니다."
+            result = False
         return result, message
     
     # 입력변수 재처리 함수
@@ -123,12 +122,9 @@ class ConversitionBlueprint:
             "dialog_id": dialog_id,
             "dialog_create_at": dialog_create_at,
             "qna_id": qna_id
-        }
-                
+        }                
         return True, jsonDataset
-    
-    
-        
+            
     # GenAI 와의 대화
     # LLM 서버에 접속하여 데이터를 수신한다.
     def generation(self, question, reference, past_dialog):        
@@ -136,30 +132,29 @@ class ConversitionBlueprint:
         conversation = prompter(preprompt, past_dialog, question, reference)                                                     
         endpoints = self.modelConfig['endpoints']
         params = self.modelConfig['parameters']
-        url = endpoints['url'] + endpoints['func'];        
+        url = endpoints['url'] + endpoints['func']
+        
         if self.check_server_status(endpoints['url']):
-            return self.ajax_llm_generation(url, conversation, params)                       
+            try:
+                header = {"Content-Type": "application/json"}
+                data = json.dumps({"prompt": conversation,"params": params})                
+                #응답요청
+                receive_data = requests.post(url, headers=header, data=data)
+                if receive_data.status_code == 200:
+                    try:
+                        response = receive_data.json()
+                        status = response['status']
+                        answer = response['answer']                        
+                        self.loggerManager.printAppLogger(response)
+                        return True, answer
+                    except ValueError:
+                        return False, "Response content is not in JSON format."                    
+                else:
+                    return False, f"Error: {receive_data.status_code}"                              
+            except requests.exceptions.RequestException as e: 
+                return False, f"요청 중 오류가 발생했습니다: {e}"                       
         else:
-            return "LLM 서버 상태를 확인하십시요."
-        
-        
-                
-    # LLM Connection & Fetch data
-    def ajax_llm_generation(self, url, prompt, params):      
-        try:
-            headers = {
-                "Content-Type": "application/json"
-            }
-            json_data = {
-                "prompt": prompt,
-                "params": params
-            } 
-            data = json.dumps(json_data)
-            data = requests.post(url, headers=headers, data=data)
-            print(f"받은데이터: {data}")
-            return data
-        except requests.exceptions.RequestException as e: 
-            return f"요청 중 오류가 발생했습니다: {e}"        
+            return False, "LLM 서버 상태를 확인하십시요."   
     
     # LLM Server Check   
     def check_server_status(self, url):
@@ -171,4 +166,4 @@ class ConversitionBlueprint:
                 return False            
         except requests.exceptions.RequestException as e:
             print(f"Error: {e}")
-            return False        
+            return False

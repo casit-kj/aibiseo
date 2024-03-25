@@ -15,7 +15,7 @@ SERVER_CONSOLE_LOG=${SERVER_LOG_DIR}/server_$(date +"%Y-%m-%d_%H").log
 
 function start()
 {
-   if lsof -i :$SERVER_PORT &>/dev/null; then
+   if lsof -t -i :$SERVER_PORT -sTCP:LISTEN &>/dev/null; then
       echo "AI Biseo Server start is aborted because port $SERVER_PORT is in use."
    else
       echo "Starting the AI Biseo S on port $SERVER_PORT ..."
@@ -32,6 +32,17 @@ function check()
     if [[ ! -d "$SERVER_LOG_DIR" ]]; then
         mkdir -p "$SERVER_LOG_DIR"
     fi    
+}
+
+function pid()
+{
+    target_pid=$(getPid)
+    echo $target_pid
+    if kill -0 $target_pid 2>/dev/null; then
+        echo "Process $target_pid is running. Attempting to terminate..."
+    else
+        echo "Not running the Process ID: $target_pid"
+    fi
 }
 
 function status() 
@@ -81,8 +92,11 @@ case "$1" in
         start
     ;;
     status)
-	status
+	    status
     ;;
+    pid)
+        pid
+    ;;     
     stop)
         stop
         sleep 0.1

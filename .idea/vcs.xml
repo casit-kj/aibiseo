@@ -2,7 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/ipynb/script/alpaca-lora" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/ipynb/script/auto_gptq" vcs="Git" />
   </component>
 </project>

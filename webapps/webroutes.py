@@ -143,7 +143,8 @@ class RouterManager:
             if session.get('uname') == reqJsonData['uName']:
                 session.clear()
             return handler.targetDeleteUser(reqJsonData)
-
+        
+        ''' LLM 에 답변 요청 '''
         @self.app.route("/api/chat", methods=["POST"])
         @cross_origin(origin="*", headers=['Content- Type', 'Authorization'])
         def conversition():                
@@ -293,7 +294,6 @@ class RouterManager:
             huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
                 api_key="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",
                 model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-                # model_name = "sentence-transformers/all-MiniLM-L6-v2"
             )
             result = handler.chromaQuery(document, huggingface_ef)
             return result
