@@ -213,6 +213,7 @@ class RouterManager:
                 'loginconfirm': session.get('logged_in')
             }
             return response_data
+        local_model_path = "/opt/embedding/paraphrase-multilingual-mpnet-base-v2"
 
         @self.app.route("/api/chromaQuery", methods=['POST'])
         def chromaQuery():
@@ -220,12 +221,22 @@ class RouterManager:
             document = [query]
 
             handler = ChromadbBlueprint(self.loggerManager)
-            huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
-                api_key="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",
-                model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+            # huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
+            #     api_key="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",
+            #     model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+            #     # model_name = "sentence-transformers/all-MiniLM-L6-v2"
+            # )
+            huggingface_ef = embedding_functions.HuggingFaceLocalEmbeddingFunction(
+                model_name=local_model_path
                 # model_name = "sentence-transformers/all-MiniLM-L6-v2"
             )
             result = handler.chromaQuery(document, huggingface_ef)
+            return result
+
+        @self.app.route("/api/chromaCollectionDelete", methods=['GET'])
+        def chromaCollectionDelete():
+            handler = ChromadbBlueprint(self.loggerManager)
+            result = handler.chromaCollectionDelete()
             return result
 
         @self.app.route("/api/chromaInsert", methods=['POST'])
@@ -243,16 +254,17 @@ class RouterManager:
             text = extract_text_from_pdf(file)
 
             #텍스트 청크사이즈로 나누기
-            chunks = split_text_into_chunks(text)
+            chunks = split_text_into_chunks_with_overlap(text)
 
             metadata = []
             id = []
             document = []
-
-            for i in range(len(chunks)):
-                metadata.append({"writer": writer, "name": name})
+            indexpage = 0
+            for page_number, chunk, chunk_num in chunks:
+                metadata.append({"writer": writer, "name": name, "pages": page_number, "pagediv": chunk_num, "index": indexpage})
                 id.append(str(uuid1()))
-                document.append(chunks[i])
+                document.append(chunk)
+                indexpage+=1
 
             handler = ChromadbBlueprint(self.loggerManager)
             huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
@@ -264,26 +276,51 @@ class RouterManager:
 
             return result
 
-            # return jsonify({"metadata": metadata, "id": id, "document": document})
-
         def extract_text_from_pdf(pdf_file):
             pdf_bytes = pdf_file.read()  # 파일의 내용을 바이트로 읽습니다.
 
             # PyMuPDF를 사용하여 바이트 데이터에서 직접 PDF를 엽니다.
             doc = fitz.open("pdf", pdf_bytes)
-            text = ""
-            for page in doc:
-                text += page.get_text()
+            pages_text = []
+            for page_number, page in enumerate(doc, start=1):
+                text = page.get_text()
+                pages_text.append((page_number, text))
             doc.close()
 
-            # 추출된 텍스트를 반환하거나 처리합니다.
-            return text
+            # 페이지 번호와 함께 추출된 텍스트를 반환합니다.
+            return pages_text
 
-        def split_text_into_chunks(text, chunk_size=600):
-            """주어진 텍스트를 chunk_size 문자로 나눕니다."""
-            chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-            return chunks
+        def split_text_into_chunks(pages_text, chunk_size=600):
+            """주어진 페이지의 텍스트와 페이지 번호를 chunk_size 문자로 나눕니다."""
+            chunks_with_page_numbers = []
+            for page_number, text in pages_text:
+                chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+                chunk_page = 0
+                for chunk in chunks:
+                    chunks_with_page_numbers.append((page_number, chunk,chunk_page))
+                    chunk_page += 1
+            return chunks_with_page_numbers
 
+        def split_text_into_chunks_with_overlap(pages_text, chunk_size=500, overlap_size=50):
+            """주어진 페이지의 텍스트를 chunk_size 문자로 나누며, 조각 간에 overlap_size만큼의 텍스트를 중복합니다."""
+            chunks_with_page_numbers = []
+            for page_number, text in pages_text:
+                # 첫 번째 조각을 처리할 때는 중복이 없음
+                if len(text) > chunk_size:
+                    first_chunk = text[:chunk_size]
+                    chunks_with_page_numbers.append((page_number, first_chunk, 0))
+                    # 이후의 조각들 처리
+                    for i in range(chunk_size, len(text), chunk_size - overlap_size):
+                        # 조각 시작 지점에서 overlap_size만큼 뒤로 가서 시작하므로, 조각들 사이에 내용의 연속성이 생깁니다.
+                        start = i - overlap_size
+                        end = start + chunk_size
+                        chunk = text[start:end]
+                        chunk_page = start // chunk_size
+                        chunks_with_page_numbers.append((page_number, chunk, chunk_page))
+                else:
+                    # 텍스트 길이가 chunk_size보다 작은 경우, 전체 텍스트를 하나의 조각으로 처리
+                    chunks_with_page_numbers.append((page_number, text, 0))
+            return chunks_with_page_numbers
         @self.app.route("/api/ChromaData", methods=['POST'])
         def chromaData():
             reqJsonData = request.get_json()
@@ -297,3 +334,52 @@ class RouterManager:
             )
             result = handler.chromaQuery(document, huggingface_ef)
             return result
+
+
+        @self.app.route("/api/chromaListGet", methods=['GET'])
+        def chromaListGet():
+            handler = ChromadbBlueprint(self.loggerManager)
+            huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
+                api_key="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",
+                model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+            )
+            result, code = handler.chromaListGet(huggingface_ef)
+            response_data = {
+                "status": code,
+                "results": {
+                    "answer": result
+                },
+                'loginconfirm': session.get('logged_in')
+            }
+            return response_data
+
+        @self.app.route("/api/chromaDelteCollection", methods=['POST'])
+        def chromaDelteCollection():
+            reqJsonData = request.get_json()
+            docName = reqJsonData['docname']
+
+            handler = ChromadbBlueprint(self.loggerManager)
+            huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
+                api_key="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",
+                model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+            )
+            result = handler.chromaDelte(docName, huggingface_ef)
+            return result
+
+        @self.app.route("/api/chromaContents", methods=['POST'])
+        def chromaContents():
+            reqJsonData = request.get_json()
+            docName = reqJsonData['docname']
+            handler = ChromadbBlueprint(self.loggerManager)
+            huggingface_ef = embedding_functions.HuggingFaceEmbeddingFunction(
+                api_key="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",
+                model_name="sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+            )
+            result, code = handler.chromaContents(docName, huggingface_ef)
+            response_data = {
+                "status": code,
+                "results": {
+                    "answer": result
+                }
+            }
+            return response_data

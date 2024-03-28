@@ -44,47 +44,65 @@
                 <span>로그아웃</span>
             </button>
         </div>
-        <div id="add_log">
+        <div id="add_chroma">
 
         </div>
     </div>
 
     <div class="conversation disable-scrollbars">
-        <form id="chromaForm" enctype="multipart/form-data">
             <div class="box" style="height: 85vh; display: flex; flex-direction: column;">
                 <div class="upload-box">
-                    <div class="upload-box-group">
-                        <label for="file-name" class="label-control">문서제목</label>
-                        <div class="col-box">
-                            <input type="text" name="file-name"  class="form-control" id="file-name">
+                    <form id="chromaForm" enctype="multipart/form-data">
+                        <div class="upload-box-group">
+                            <label for="file-name" class="label-control">문서제목</label>
+                            <div class="col-box">
+                                <input type="text" name="file-name"  class="form-control" id="file-name">
+                            </div>
+                            <label for="file-writer" class="label-control">문서작성자</label>
+                            <div class="col-box">
+                                <input type="text" name="file-writer" class="form-control" id="file-writer">
+                            </div>
                         </div>
-                        <label for="file-writer" class="label-control">문서작성자</label>
-                        <div class="col-box">
-                            <input type="text" name="file-writer" class="form-control" id="file-writer">
+                        <div class="ln_solid"></div>
+                        <div class="upload-box-group">
+                            <label for="file-upload" class="label-control">문서내용</label>
+                            <div class="col-box" style="width: 60%;">
+                                <input type="file" name="file-content" accept="application/pdf" class="form-control" id="file-content">
+                            </div>
+                            <div class="bottom_buttons" id="chromaButton" style="width: 20vh;padding: 5px;">
+                                <button onclick="chromaInsert()" style="background-color: #16101b66;">
+                                    <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
+                                    <span>크로마입력</span>
+                                </button>
+                                <button onclick="chromaCollectionDelete()" style="background-color: #16101b66;">
+                                    <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
+                                    <span>크로마삭제</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ln_solid"></div>
+                    </form>
+                </div>
+                <div class="chromadb-display">
+                    <div class="chromadb-pages">
+                       <div id="add_contents_list">
+
+                       </div>
+                    </div>
+                    <div class="chromadb-pages">
+                        <div id="pageResult">
+
                         </div>
                     </div>
-                    <div class="ln_solid"></div>
-                    <div class="upload-box-group">
-                        <label for="file-upload" class="label-control">문서내용</label>
-                        <div class="col-box" style="width: 60%;">
-                            <input type="file" name="file-content" class="form-control" id="file-content">
-                        </div>
-                        <div class="bottom_buttons" id="chromaButton" style="width: 12%">
-                            <button onclick="chromaInsert()" style="background-color: #16101b66;">
-                                <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
-                                <span>크로마</span>
-                            </button>
-                        </div>
-                        <div class="bottom_buttons" id="chromaButton" style="width: 14%">
-                            <button onclick="chromaQuery()" style="background-color: #16101b66;">
-                                <i class="fa-regular fa-circle-up" style="color:#74b4ec; "></i>
-                                <span>크로마쿼리</span>
-                            </button>
+                    <div class="chromadb-pages">
+                        <div id="pageDivResult">
+
                         </div>
                     </div>
                 </div>
+
             </div>
-        </form>
+
     </div>
 </div>
 <!-- 로그인 창 -->
@@ -168,7 +186,7 @@
             }
         });
         headMenuBar();
-        upLoadPage();
+        chromaListGet();
         // 모달 열기
         $("#openModal").click(function() {
             $("#modalwindow").css("display", "block");

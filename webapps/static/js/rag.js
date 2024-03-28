@@ -41,7 +41,7 @@ async function askGenAI() {
     const message_input = $('#message-input');
     const chBox = $('#toggle-slider').is(':checked');
     const spinner = $('.spinner');
-
+    const stopButton = $('.stop_generating');
     if ($('#messages .bwCom').length > 0) {
         // 'bwCom' 클래스를 가진 요소가 하나 이상 있을 경우, 'messages' div의 내용을 비웁니다.
         $('#messages').empty();
@@ -54,6 +54,7 @@ async function askGenAI() {
     console.log(message);
     if (message.length > 0) {
         spinner.show();
+        // stopButton.removeClass('stop_generating-hidden');
         message_input.value = ``;
         previousChat = previousConversations();
         await messageBoxGen(message);
@@ -73,6 +74,7 @@ async function askGenAI() {
         await requestGenAI(message, arrayDataset, previousChat);
         await chatList();
         spinner.hide();
+        // stopButton.addClass('stop_generating-hidden');
     }
     message_input.prop('disabled', false);
 }
@@ -197,6 +199,11 @@ async function requestGenAI(message, arrayBwDataset, previousChat) {
 }
 
 /**
+ * 질문 요청 변수
+ * @type {null}
+ */
+let responseLLM = null;
+/**
  * 라마 LLM 요청
  * @param {*} message_box
  * @param {*} message
@@ -219,6 +226,9 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
     };
     const sendAksJson = JSON.stringify(askJson);
     console.log(sendAksJson);
+    if (responseLLM != null) {
+        responseLLM.abort(); // 이전 요청이 있다면 중단
+    }
     try {
         const response = await $.ajax({
             type: "POST",
@@ -259,7 +269,7 @@ async function requestGenAI_LLAMA(message_box, message, arrayBwDataset, previous
             $(`#llm_temporary`).append(` [중단됨]`);
 
         }
-
+        responseLLM = null; //질문요청 변수 초기화
         window.scrollTo(0, 0);
     }
 }
@@ -385,7 +395,7 @@ async function chatList() {
                 clearConversations.css("display", "block");
                 userConfig.css("display", "block");
                 messageInput.prop('disabled', false);
-                messageInput.attr('placeholder', '토글이 활성화 되면 질문에 검색자료를 첨부합니다.');
+                messageInput.attr('placeholder', '활성화되면 L.A.G(ChromaDB 데이터를 첨부합니다.)');
             } else {
                 logoutConversations.css("display", "none");
                 loginConversations.css("display", "block");
@@ -1336,9 +1346,12 @@ async function chromaInsert() {
             dataType: "json", // 서버로부터 JSON 응답을 기대
         });
         console.log("File metadata:", response);
+        alert("입력이 완료되었습니다.");
     } catch (error) {
         console.error("Error:", error);
+        alert("입력이 실패하였습니다");
     }
+    await chromaListGet();
 }
 
 /**
@@ -1424,4 +1437,237 @@ async function chromaSearchResult(chdataset) {
         divContent.append(spanContent);
         resultbox.append(divTitle, divContent);
     });
+}
+
+/**
+ * Chroma List 가져오기
+ * @returns {Promise<void>}
+ */
+async function chromaListGet(){
+    const loginConversations = $('#login-conversations');
+    const logoutConversations = $('#logout-conversations');
+    const addChroma = $('#add_chroma');
+    const addContentsList = $('#add_contents_list');
+    const pageResult = $('#pageResult');
+    const pageDivResult = $('#pageDivResult');
+    addContentsList.empty();
+    pageResult.empty();
+    pageDivResult.empty();
+    addChroma.empty();
+    try {
+        const response = await $.ajax({
+            url: "/api/chromaListGet",
+            type: "GET"
+        });
+        console.log(response);
+        const docName =  response['results']['answer']['result']['answer']['metadatas'];
+        const loginConfirm = response['loginconfirm'];
+        if (loginConfirm) {
+            loginConversations.css("display", "none");
+            logoutConversations.css("display", "block");
+            addChroma.css("display", "block");
+        } else {
+            logoutConversations.css("display", "none");
+            loginConversations.css("display", "block");
+            addChroma.css("display", "none");
+        }
+        if (docName !== null) {
+            await chromaListup(docName);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+/**
+ * chromaList 출력하기
+ * @param dataSet
+ * @returns {Promise<void>}
+ */
+async function chromaListup(dataSet) {
+    const addChroma = $('#add_chroma');
+    addChroma.empty();
+    dataSet.forEach(function (data,index) {
+        let divConvo = $("<div></div>").addClass("convo")
+            .attr("id", data.name);
+        let divLeft = $("<div></div>").addClass("left");
+        let iIcon = $("<i></i>").addClass("fa-regular fa-file-pdf");
+        let spanConvoTitle = $("<span></span>").addClass("convo-title")
+            .attr('onclick', "chromaContents('"+data.name+"')")
+            .text(data.name);
+        let iShow = $("<i></i>").addClass("fa-regular fa-trash")
+            .attr('onclick', "show_option('" + index + "')")
+            .attr('id', "conv-" + index);
+        let iDelete = $("<i></i>").addClass("fa-regular fa-check")
+            .css("display", "none")
+            .attr('onclick', "deleteChroma('"+data.name+"')")
+            .attr('id', "yes-" + index);
+        let iHide = $("<i></i>").addClass("fa-regular fa-x")
+            .css("display", "none")
+            .attr('onclick', "hide_option('" + index + "')")
+            .attr('id', "not-" + index);
+        divLeft.append(iIcon, spanConvoTitle);
+        divConvo.append(divLeft, iShow, iDelete, iHide);
+        addChroma.append(divConvo);
+    });
+}
+
+/**
+ * chromaDB collection 삭제
+ * @param docname
+ * @returns {Promise<void>}
+ */
+async function deleteChroma(docname) {
+
+    let deleteDocname = JSON.stringify({"docname": docname})
+    try {
+        const response = await $.ajax({
+            url: "/api/chromaDelteCollection",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: deleteDocname,
+        });
+        console.log(response);
+        if (response["status"]) {
+            await chromaListGet();
+        } else {
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+/**
+ * 크로마 문서 본문 요청
+ * @param docname
+ * @returns {Promise<void>}
+ */
+async function chromaContents(docname) {
+    let docData = JSON.stringify({"docname": docname})
+    try {
+        const response = await $.ajax({
+            url: "/api/chromaContents",
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            data: docData,
+        });
+        console.log(response);
+        const dataSet = response["results"]["answer"]["result"]["answer"]
+        if (response["status"]) {
+            await chromaListGet();
+            await chromaContentResult(dataSet);
+            contentsdataSet = dataSet;
+        } else {
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+
+/**
+ * 크로마본문 페이지 리스트 출력
+ * @param dataSet
+ * @returns {Promise<void>}
+ */
+async function chromaContentResult(dataSet) {
+    const addContentsList = $('#add_contents_list');
+    addContentsList.empty();
+    const metadatas = dataSet["metadatas"];
+    const documents = dataSet["documents"];
+
+
+    metadatas.forEach(function (data,index) {
+        if (data.pagediv===0){
+            let divConvo = $("<div></div>").addClass("convo_contents")
+                .attr("id", data.pages);
+            let divLeft = $("<div></div>").addClass("left");
+            let iIcon = $("<i></i>").addClass("fa-regular fa-file-word")
+                .css('font-size','18px');
+            let spanConvoTitle = $("<span></span>").addClass("convo-title")
+                .attr('onclick', "chromaContentsPages("+data.pages+")")
+                .css('font-size','20px')
+                .css('padding','5px')
+                .text((data.pages+1)+".page");
+            divLeft.append(iIcon, spanConvoTitle);
+            divConvo.append(divLeft);
+            addContentsList.append(divConvo);
+        }
+    });
+}
+
+/**
+ * 크로마 본문 내용 출력
+ * @param pageNum
+ * @returns {Promise<void>}
+ */
+async function chromaContentsPages(pageNum) {
+    const pageResult = $('#pageResult');
+    const pageDivResult = $('#pageDivResult');
+    pageResult.empty();
+    pageDivResult.empty();
+    const metadatas = contentsdataSet["metadatas"];
+    const documents = contentsdataSet["documents"];
+
+
+    metadatas.forEach(function (data,index) {
+        if (data.pages===pageNum){
+            let spanRETitle = $("<span></span>").text(data.pages+1+ '.page');
+            let divReTitle = $("<div></div>").addClass("rcontent");
+            divReTitle.append(spanRETitle);
+            let spanReContent = $("<span></span>").text(documents[index]);
+            if (data.pagediv===0){
+                pageResult.append(divReTitle,spanReContent);
+            } else{
+                pageResult.append(spanReContent);
+            }
+
+
+            let titlePageNoAName = (data.pages+1) + '.page > ' + (data.pagediv+1)+'.chunks';
+            let divTitle = $("<div></div>").addClass("rcontent");
+            let spanTitle = $("<span></span>").text(titlePageNoAName);
+            divTitle.append(spanTitle);
+            let divContent = $("<div></div>").addClass("search-content");
+            let spanContent = $("<span></span>").text(documents[index]);
+            divContent.append(spanContent);
+            let lnSolid = $("<div></div>").addClass("ln_solid");
+            pageDivResult.append(divTitle,divContent,lnSolid)
+        }
+    });
+}
+
+/**
+ * 대화 중지
+ */
+function stopRequest() {
+    console.log("abort start");
+    const questionId = $('#user_temporary');
+    const answerId = $('#llm_temporary');
+    if (responseLLM != null) {
+        console.log(responseLLM);
+        responseLLM.abort(); // 진행 중인 요청 중단
+
+        answerId.empty();
+        questionId.text("요청이 사용자에 의해 중지되었습니다.");
+        questionId.attr('id', "user_stop");
+        answerId.attr('id', "llm_stop");
+    }
+}
+
+async function chromaCollectionDelete() {
+    try {
+        const response = await $.ajax({
+            url: "/api/chromaCollectionDelete",
+            type: "GET"
+        });
+        console.log(response);
+        if (response['status']) {
+            return response['result'];
+        } else {
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }

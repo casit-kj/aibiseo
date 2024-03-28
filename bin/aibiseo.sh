@@ -5,9 +5,9 @@ export FLASK_APP=aibiseo
 export FLASK_DEBUG=true
 
 SERVER_PORT=5000
-SERVER_VENV=/data/pvenv/aibiseo
+SERVER_VENV=/opt/aibiseo/venv
 SERVER_APP_NAME=aibiseo
-SERVER_HOME=${HOME}/aibiseo
+SERVER_HOME=/opt/aibiseo
 SERVER_LOG_DIR=${SERVER_HOME}/logs
 SERVER_CONFIG_DIR=${SERVER_HOME}/config
 SERVER_START_FILE=starter.py

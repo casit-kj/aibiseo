@@ -795,7 +795,8 @@ li a:hover{
 }
 
 .upload-box{
-    padding: 30px;
+    padding: 10px 20px;
+    height: 20vh;
 }
 
 .upload-box-group{
@@ -834,10 +835,31 @@ li a:hover{
     color: #ffffff;
     background-color: #ffffff;
     height: 1px;
-    margin: 20px 0
+    margin: 10px 0
 }
 .col-box{
     position: relative;
     width: 33%;
     float: left;
+}
+.chromadb-display{
+    height: 65vh;
+    display: grid;
+    grid-template-columns: 2fr 6fr 6fr;
+    max-height: 65vh;
+}
+.chromadb-pages{
+    padding: 10px;
+    width: 100%;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break:break-all;
+}
+.convo_contents{
+    padding: 8px 12px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    user-select: none;
+    justify-content: space-between;
 }

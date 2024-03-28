@@ -2,7 +2,7 @@
     "admin": {
         "id": "casit"
     },
-    "basedir": "/home/bwis/aibiseo",
+    "basedir": "/opt/aibiseo",
     "datasource": {
         "url": "118.217.7.2",
         "port": 3306,
